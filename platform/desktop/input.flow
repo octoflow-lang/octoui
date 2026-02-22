@@ -15,6 +15,10 @@ use "../../widgets/input/button"
 // Mouse state: [0]=mouse_x [1]=mouse_y [2]=mouse_down [3]=prev_mouse_down
 let mut _ui_input = [0.0, 0.0, 0.0, 0.0]
 
+// Keyboard state: last key event
+let mut _ui_key_down = " "
+let mut _ui_key_up = " "
+
 // Poll all pending window events and update mouse state
 // Returns 1.0 if window is still open, 0.0 if close requested
 fn ui_poll_events()
@@ -22,6 +26,10 @@ fn ui_poll_events()
 
   // Save previous mouse-down state for click detection
   _ui_input[3] = _ui_input[2]
+
+  // Clear per-frame key events
+  _ui_key_down = " "
+  _ui_key_up = " "
 
   // Drain the event queue
   let mut evt = window_poll()
@@ -39,6 +47,12 @@ fn ui_poll_events()
       _ui_input[0] = window_event_x()
       _ui_input[1] = window_event_y()
       _ui_input[2] = 0.0
+    end
+    if evt == "key_down"
+      _ui_key_down = window_event_key()
+    end
+    if evt == "key_up"
+      _ui_key_up = window_event_key()
     end
     if evt == "close"
       alive = 0.0
@@ -123,4 +137,18 @@ fn ui_process_input()
     i = i + 1.0
   end
   return 0.0
+end
+
+// Check if a specific key was pressed this frame
+// key: key name string ("escape", "space", "enter", "a"-"z", "0"-"9", etc.)
+fn ui_key_pressed(key)
+  if _ui_key_down == key
+    return 1.0
+  end
+  return 0.0
+end
+
+// Get the last key pressed this frame (empty string if none)
+fn ui_key_down()
+  return _ui_key_down
 end

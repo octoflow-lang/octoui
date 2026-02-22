@@ -15,6 +15,10 @@
 - Reactive state management (value-binding with auto text updates)
 - Press-to-click buttons (fires on mouse-down for instant response)
 - Smart sleep (only when idle — zero latency on interaction frames)
-- Examples: hello, counter (Phase 1 acceptance test)
-- Documentation: quickstart, architecture, widgets
+- Separator widget (2px horizontal line in border color)
+- Progress bar widget (track + fill, bind to reactive state)
+- Keyboard input support (ui_key_pressed, ui_key_down)
+- Text width auto-update on reactive state change (re-runs layout)
+- Examples: hello, counter, dashboard, timer
+- Documentation: quickstart, architecture, widgets (keyboard, separator, progress bar)
 - Tests: 18/18 passing (12 tree + 6 kernel)

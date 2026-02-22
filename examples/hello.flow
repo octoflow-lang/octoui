@@ -36,6 +36,11 @@ while running == 1.0
     running = 0.0
   end
 
+  // Escape to close
+  if ui_key_pressed("escape") == 1.0
+    running = 0.0
+  end
+
   if ui_is_dirty() == 1.0
     let _r = ui_pipeline_render()
     let _p = ui_pipeline_present()

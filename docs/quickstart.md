@@ -79,6 +79,19 @@ end
 let _c = ui_window_close()
 ```
 
+## More Examples
+
+```bash
+# Hello world (static text)
+octoflow run octoui/examples/hello.flow --allow-read --allow-write --allow-ffi
+
+# Dashboard (multi-panel layout with two counters)
+octoflow run octoui/examples/dashboard.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
+
+# Timer (countdown with progress bar, keyboard shortcuts)
+octoflow run octoui/examples/timer.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
+```
+
 ## How It Works
 
 OctoUI renders entirely on the GPU using compute shader dispatch chains:

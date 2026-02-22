@@ -78,6 +78,11 @@ while running == 1.0
     running = 0.0
   end
 
+  // Escape to close
+  if ui_key_pressed("escape") == 1.0
+    running = 0.0
+  end
+
   let _pi = ui_process_input()
 
   // Left panel buttons

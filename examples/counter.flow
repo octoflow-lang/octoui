@@ -57,6 +57,11 @@ while running == 1.0
     running = 0.0
   end
 
+  // Escape to close
+  if ui_key_pressed("escape") == 1.0
+    running = 0.0
+  end
+
   // Process input (hit testing, hover/press states)
   let _pi = ui_process_input()
 

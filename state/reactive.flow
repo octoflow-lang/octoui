@@ -9,6 +9,7 @@
 //   let val = ui_state_get(counter_state)
 
 use "../engine/tree"
+use "../engine/layout"
 use "../engine/dirty"
 
 // State values
@@ -38,6 +39,7 @@ fn ui_state_set(state_id, val)
   if old != val
     let _d = ui_mark_dirty()
     // Update bound widgets
+    let mut needs_layout = 0.0
     let n_binds = len(_ui_bind_widget)
     let mut bi = 0.0
     while bi < n_binds
@@ -45,10 +47,22 @@ fn ui_state_set(state_id, val)
         let wid = _ui_bind_widget[bi]
         // Convert value to string for text display
         let sval = str(val)
+        let old_len = len(_ui_texts[wid])
         _ui_texts[wid] = sval
         _ui_dirty[wid] = 1.0
+        // Update text widget width if length changed
+        let new_len = len(sval)
+        if new_len != old_len
+          let char_w = 10.0
+          _ui_w[wid] = new_len * char_w
+          needs_layout = 1.0
+        end
       end
       bi = bi + 1.0
+    end
+    // Re-run layout if any text widget changed size
+    if needs_layout == 1.0
+      let _l = ui_layout_update()
     end
   end
   return 0.0

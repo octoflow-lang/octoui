@@ -78,6 +78,48 @@ end
 - Hovered (1) — Hover color
 - Pressed (2) — Active color
 
+### Separator — `widgets/core/separator.flow`
+
+A thin horizontal line for visual grouping between widgets.
+
+```
+use "octoui/widgets/core/separator"
+
+let sep = ui_separator(parent, 300.0)  // 300px wide, 2px tall
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Width in pixels
+
+Rendered as a 2px tall rectangle in the border color.
+
+### Progress Bar — `widgets/core/progress.flow`
+
+A horizontal progress bar with track and fill. Bind to a reactive state for automatic updates.
+
+```
+use "octoui/widgets/core/progress"
+
+let pbar = ui_progress(parent, 300.0, 12.0)    // 300px wide, 12px tall
+let pct_state = ui_state(50.0)                  // 50%
+let _bp = ui_bind_progress(pbar, pct_state)     // Bind
+
+// In event loop (after state changes):
+let _pu = ui_progress_update()                  // Sync fill width
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Total width in pixels
+- `h` — Height in pixels (typically 8-16)
+
+**Functions:**
+- `ui_bind_progress(track_id, state_id)` — Bind fill to reactive state (0.0 - 100.0)
+- `ui_progress_update()` — Sync all progress bar fills to their bound states
+
+The track renders in border color, the fill in primary color.
+
 ## Layout Widgets
 
 ### Column — `widgets/layout/column.flow`
@@ -126,6 +168,29 @@ ui_state_set(counter, ui_state_get(counter) + 1.0)  // Update
 ```
 
 When `ui_state_set` changes a value, all bound widgets automatically update their text and the frame is marked dirty.
+
+## Keyboard Input
+
+```
+use "octoui/platform/desktop/input"
+
+// In event loop (after ui_poll_events):
+if ui_key_pressed("escape") == 1.0
+  // Escape key was pressed this frame
+end
+
+if ui_key_pressed("space") == 1.0
+  // Space bar was pressed this frame
+end
+
+let key = ui_key_down()  // Get last key name (" " if none)
+```
+
+**Functions:**
+- `ui_key_pressed(key)` — Returns 1.0 if key was pressed this frame
+- `ui_key_down()` — Returns key name of last key-down event
+
+**Key names:** `"escape"`, `"space"`, `"enter"`, `"a"`-`"z"`, `"0"`-`"9"`, etc.
 
 ## Tree Operations
 
