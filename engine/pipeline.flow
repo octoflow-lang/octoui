@@ -15,6 +15,7 @@ use "tree"
 use "dirty"
 use "font"
 use "../themes/dark"
+use "../widgets/core/tooltip"
 
 // VM state: [0]=vm_id [1]=screen_w [2]=screen_h [3]=initialized [4]=total_pixels
 let mut _ui_vm = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -118,6 +119,9 @@ fn ui_pipeline_render()
         if ftype == UI_LISTBOX
           draw_border = 1.0
         end
+        if ftype == UI_SPINBOX
+          draw_border = 1.0
+        end
         if draw_border == 1.0
           let bpad = 2.0
           _ui_pc_rect[0] = _ui_x[fi] - bpad
@@ -168,6 +172,9 @@ fn ui_pipeline_render()
       if wtype == UI_LISTBOX
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
+      if wtype == UI_SPINBOX
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
     end
     i = i + 1.0
   end
@@ -187,8 +194,99 @@ fn ui_pipeline_render()
       if wtype == UI_TEXTINPUT
         let _dt = ui_pipeline_dispatch_textinput_text(vm, j, w, total)
       end
+      if wtype == UI_SPINBOX
+        let _dt = ui_pipeline_dispatch_button_text(vm, j, w, total)
+      end
     end
     j = j + 1.0
+  end
+
+  // ── 3b. Tooltip overlay (renders on top of everything) ──
+  if ui_tooltip_visible() == 1.0
+    let tt_text = ui_tooltip_text()
+    let tt_x = ui_tooltip_x()
+    let tt_y = ui_tooltip_y()
+    let tt_len = len(tt_text)
+    let tt_scale = 2.0
+    let tt_char_w = 5.0 * tt_scale
+    let tt_text_h = 6.0 * tt_scale
+    let tt_pad = 4.0
+    let tt_w = tt_len * tt_char_w + tt_pad * 2.0
+    let tt_h = tt_text_h + tt_pad * 2.0
+
+    // Background rect (dark surface)
+    _ui_pc_rect[0] = tt_x
+    _ui_pc_rect[1] = tt_y
+    _ui_pc_rect[2] = tt_w
+    _ui_pc_rect[3] = tt_h
+    _ui_pc_rect[4] = ui_theme_r(UI_COLOR_SURFACE)
+    _ui_pc_rect[5] = ui_theme_g(UI_COLOR_SURFACE)
+    _ui_pc_rect[6] = ui_theme_b(UI_COLOR_SURFACE)
+    _ui_pc_rect[7] = w
+    _ui_pc_rect[8] = total
+    let tt_pixels = tt_w * tt_h
+    let tt_wg = floor((tt_pixels + 255.0) / 256.0)
+    let _dtt = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, tt_wg)
+
+    // Border rect (primary color, 1px larger on each side)
+    _ui_pc_rect[0] = tt_x - 1.0
+    _ui_pc_rect[1] = tt_y - 1.0
+    _ui_pc_rect[2] = tt_w + 2.0
+    _ui_pc_rect[3] = tt_h + 2.0
+    _ui_pc_rect[4] = ui_theme_r(UI_COLOR_BORDER)
+    _ui_pc_rect[5] = ui_theme_g(UI_COLOR_BORDER)
+    _ui_pc_rect[6] = ui_theme_b(UI_COLOR_BORDER)
+    let tt_bp = (tt_w + 2.0) * (tt_h + 2.0)
+    let tt_bwg = floor((tt_bp + 255.0) / 256.0)
+    let _dttb = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, tt_bwg)
+
+    // Re-draw background (on top of border)
+    _ui_pc_rect[0] = tt_x
+    _ui_pc_rect[1] = tt_y
+    _ui_pc_rect[2] = tt_w
+    _ui_pc_rect[3] = tt_h
+    _ui_pc_rect[4] = ui_theme_r(UI_COLOR_SURFACE)
+    _ui_pc_rect[5] = ui_theme_g(UI_COLOR_SURFACE)
+    _ui_pc_rect[6] = ui_theme_b(UI_COLOR_SURFACE)
+    let _dttf = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, tt_wg)
+
+    // Tooltip text
+    let tt_cr = ui_theme_r(UI_COLOR_TEXT)
+    let tt_cg = ui_theme_g(UI_COLOR_TEXT)
+    let tt_cb = ui_theme_b(UI_COLOR_TEXT)
+    let tt_tx = tt_x + tt_pad
+    let tt_ty = tt_y + tt_pad
+
+    let mut tt_ci = 0.0
+    while tt_ci < tt_len
+      let tt_ch = char_at(tt_text, tt_ci)
+      let tt_code = ord(tt_ch)
+      if tt_code > 32.0
+        let mut tt_glyph = tt_code - 32.0
+        if tt_code >= 97.0
+          if tt_code <= 122.0
+            tt_glyph = tt_code - 97.0 + 33.0
+          end
+        end
+        if tt_glyph >= 0.0
+          if tt_glyph < 64.0
+            _ui_pc_text[0] = tt_glyph * 6.0
+            _ui_pc_text[1] = tt_tx + tt_ci * tt_char_w
+            _ui_pc_text[2] = tt_ty
+            _ui_pc_text[3] = tt_scale
+            _ui_pc_text[4] = tt_cr
+            _ui_pc_text[5] = tt_cg
+            _ui_pc_text[6] = tt_cb
+            _ui_pc_text[7] = w
+            _ui_pc_text[8] = total
+            let tt_threads = 24.0 * tt_scale * tt_scale
+            let tt_twg = floor((tt_threads + 255.0) / 256.0)
+            let _dttg = vm_dispatch(vm, _ui_spv_text, _ui_pc_text, tt_twg)
+          end
+        end
+      end
+      tt_ci = tt_ci + 1.0
+    end
   end
 
   // ── 4. Build single command buffer ──

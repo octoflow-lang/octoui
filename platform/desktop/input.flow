@@ -18,6 +18,7 @@ use "../../widgets/input/radio"
 use "../../widgets/input/toggle"
 use "../../widgets/input/listbox"
 use "../../widgets/input/tabs"
+use "../../widgets/input/spinbox"
 
 // Mouse state: [0]=mouse_x [1]=mouse_y [2]=mouse_down [3]=prev_mouse_down
 let mut _ui_input = [0.0, 0.0, 0.0, 0.0]
@@ -202,6 +203,17 @@ fn ui_process_input()
         end
       end
 
+      // ── Spinbox display ──
+      if wtype == UI_SPINBOX
+        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+
+        if hit == 1.0
+          if clicked == 1.0
+            clicked_widget = i
+          end
+        end
+      end
+
       // ── Listbox ──
       if wtype == UI_LISTBOX
         let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
@@ -304,6 +316,9 @@ fn ui_is_focusable(wtype)
     return 1.0
   end
   if wtype == UI_LISTBOX
+    return 1.0
+  end
+  if wtype == UI_SPINBOX
     return 1.0
   end
   return 0.0

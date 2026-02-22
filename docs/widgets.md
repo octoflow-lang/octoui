@@ -16,6 +16,7 @@
 | UI_TOGGLE | 10.0 | Toggle switch |
 | UI_TAB | 11.0 | Tab button |
 | UI_LISTBOX | 12.0 | Selectable list |
+| UI_SPINBOX | 13.0 | Numeric up/down |
 
 ## Core Widgets
 
@@ -428,6 +429,61 @@ let text = ui_listbox_selected_text(lb)  // selected item text
 
 **Visual:** Selected item has primary color background. Items show in a fixed viewport; the list scrolls as you navigate past the visible area.
 
+### Spinbox — `widgets/input/spinbox.flow`
+
+A numeric input with [-] and [+] buttons. Configurable min, max, and step.
+
+```
+use "octoui/widgets/input/spinbox"
+
+let spin = ui_spinbox(parent, 120.0, 26.0, 0.0, 100.0, 1.0, 50.0)
+//                                         min  max   step initial
+
+// In event loop:
+let _sp = ui_spinbox_process()
+let _sk = ui_spinbox_process_key(key)
+
+// Get value:
+let val = ui_spinbox_value(spin)
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Total width (includes +/- buttons)
+- `h` — Height
+- `min_val` — Minimum value
+- `max_val` — Maximum value
+- `step` — Increment per click/keypress
+- `initial` — Starting value
+
+**Functions:**
+- `ui_spinbox(parent, w, h, min, max, step, initial)` — Create spinbox
+- `ui_spinbox_value(id)` — Get current value
+- `ui_spinbox_set(id, val)` — Set value programmatically
+- `ui_spinbox_process()` — Process +/- button clicks (call each frame)
+- `ui_spinbox_process_key(key)` — Process Up/Down arrow keys for focused spinbox
+
+**Keyboard:** Up/Down arrow keys adjust value when the spinbox display is focused.
+
+### Tooltip — `widgets/core/tooltip.flow`
+
+Hover-triggered text popups. Register tooltip text for any widget.
+
+```
+use "octoui/widgets/core/tooltip"
+
+let _tt = ui_tooltip_register(button_id, "SAVE CHANGES")
+
+// In event loop:
+let _tp = ui_tooltip_process(ui_mouse_x(), ui_mouse_y())
+```
+
+**Functions:**
+- `ui_tooltip_register(widget_id, text)` — Attach tooltip to a widget
+- `ui_tooltip_process(mx, my)` — Update tooltip state each frame
+
+**Behavior:** When the mouse hovers over a registered widget for ~0.3 seconds, a floating text popup appears near the cursor. Moving the mouse away hides the tooltip. Tooltips render on top of all other widgets.
+
 ## Layout Widgets
 
 ### Column — `widgets/layout/column.flow`
@@ -486,7 +542,7 @@ let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox.
 
 **Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
 
@@ -532,6 +588,7 @@ let key = ui_key_down()  // Get last key name (" " if none)
 | Space | Toggle | Toggle on/off state |
 | Escape | Dropdown | Close open dropdown |
 | Up/Down | Listbox | Navigate items (auto-scrolls viewport) |
+| Up/Down | Spinbox | Increment/decrement value by step |
 
 ## Tree Operations
 
