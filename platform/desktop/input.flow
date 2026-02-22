@@ -57,10 +57,11 @@ fn ui_process_input()
   let mdown = _ui_input[2]
   let prev_down = _ui_input[3]
 
-  // Detect click: was down last frame, now up
+  // Detect click: mouse just pressed (press-to-click for responsiveness)
+  // Fires on the SAME frame as the visual press, no 1-frame delay
   let mut clicked = 0.0
-  if prev_down == 1.0
-    if mdown == 0.0
+  if mdown == 1.0
+    if prev_down == 0.0
       clicked = 1.0
     end
   end

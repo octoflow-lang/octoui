@@ -40,9 +40,9 @@ while running == 1.0
     let _r = ui_pipeline_render()
     let _p = ui_pipeline_present()
     let _cd = ui_clear_dirty()
+  else
+    let _sl = sleep(16.0)
   end
-
-  let _sl = sleep(16.0)
 end
 
 // Cleanup
