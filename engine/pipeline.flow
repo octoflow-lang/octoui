@@ -112,6 +112,9 @@ fn ui_pipeline_render()
         if ftype == UI_RADIO
           draw_border = 1.0
         end
+        if ftype == UI_TOGGLE
+          draw_border = 1.0
+        end
         if draw_border == 1.0
           let bpad = 2.0
           _ui_pc_rect[0] = _ui_x[fi] - bpad
@@ -154,6 +157,9 @@ fn ui_pipeline_render()
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
       if wtype == UI_RADIO
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
+      if wtype == UI_TOGGLE
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
     end
@@ -411,7 +417,12 @@ fn ui_pipeline_dispatch_textinput_text(vm, idx, screen_w, total)
 
   // Draw cursor if this widget has focus
   if idx == _ui_focus_id
-    let cursor_x = tx + tlen * char_w
+    // Use cursor position from textinput module (if available)
+    let mut cpos = tlen
+    if idx < len(_ui_ti_cursor)
+      cpos = _ui_ti_cursor[idx]
+    end
+    let cursor_x = tx + cpos * char_w
     let cursor_y = by + 3.0
     let cursor_h = bh - 6.0
     // Cursor: 2px wide rect in text color

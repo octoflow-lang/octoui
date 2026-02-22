@@ -37,8 +37,11 @@
 - Dropdown select widget (trigger + option list, click-outside-to-close)
 - Dynamic visibility toggle (ui_tree_set_visible, layout-aware)
 - Mouse click detection helper (ui_mouse_clicked)
-- 11 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown
-- Full keyboard accessibility (Tab + Space + Enter + arrows)
+- Toggle switch widget (on/off with sliding knob, click or Space to toggle)
+- Text input cursor movement (Left/Right, Home/End, insert/delete at position)
+- Escape key closes open dropdown
+- 12 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle
+- Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End)
 - Examples: hello, counter, dashboard, timer, form, settings, panel
-- Documentation: quickstart, architecture, widgets (all widgets + keyboard + dropdown)
+- Documentation: quickstart, architecture, widgets (all widgets + keyboard + dropdown + toggle)
 - Tests: 18/18 passing (12 tree + 6 kernel)

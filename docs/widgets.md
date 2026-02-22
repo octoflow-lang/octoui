@@ -12,6 +12,8 @@
 | UI_CHECKBOX | 6.0 | Checkbox toggle |
 | UI_TEXTINPUT | 7.0 | Single-line text input |
 | UI_SLIDER | 8.0 | Draggable slider |
+| UI_RADIO | 9.0 | Radio button |
+| UI_TOGGLE | 10.0 | Toggle switch |
 
 ## Core Widgets
 
@@ -201,7 +203,9 @@ let text = ui_textinput_value(input)
 - `ui_textinput_process_key(key)` — Process keyboard input for focused widget
 - `ui_textinput_submitted(id)` — Returns 1.0 if Enter was pressed this frame
 
-**Focus:** Click the text input to focus it. Only the focused input receives keyboard events. A cursor is displayed when focused.
+**Focus:** Click the text input to focus it. Only the focused input receives keyboard events. A cursor is displayed at the current position when focused.
+
+**Cursor movement:** Left/Right arrow keys move the cursor within the text. Home jumps to the start, End jumps to the end. Characters are inserted at the cursor position. Backspace deletes the character before the cursor, Delete removes the character after the cursor.
 
 **Enter key:** Press Enter to submit. Check with `ui_textinput_submitted(id)` each frame.
 
@@ -300,7 +304,41 @@ let sel = ui_dropdown_selected(dd)  // 0-based index
 - `ui_dropdown_set(trigger, index)` — Set selection programmatically
 - `ui_dropdown_process(mx, my, clicked)` — Process clicks (call each frame)
 
-**Behavior:** Click trigger to open/close option list. Click option to select. Click outside to close. Only one dropdown open at a time.
+**Behavior:** Click trigger to open/close option list. Click option to select. Click outside or press Escape to close. Only one dropdown open at a time.
+
+### Toggle Switch — `widgets/input/toggle.flow`
+
+An on/off switch with a sliding knob. Visually distinct from checkboxes — track changes color and knob slides left/right.
+
+```
+use "octoui/widgets/input/toggle"
+
+let tgl = ui_toggle(parent, "DARK MODE")
+
+// Check state:
+if ui_toggle_on(tgl) == 1.0
+  // Toggle is ON
+end
+
+// Set programmatically:
+let _s = ui_toggle_set(tgl, 1.0)  // ON
+let _s = ui_toggle_set(tgl, 0.0)  // OFF
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `label` — Text shown next to the toggle switch
+
+**Functions:**
+- `ui_toggle(parent, label)` — Create toggle, returns row widget ID
+- `ui_toggle_on(id)` — Returns 1.0 if toggle is ON
+- `ui_toggle_set(id, val)` — Set state programmatically (0.0 or 1.0)
+- `ui_toggle_toggle(track_id)` — Toggle state (called by input system)
+- `ui_toggle_update_all()` — Position all knobs after layout (call once after `ui_layout_update`)
+
+**Visual:** OFF = border-color track, knob on left. ON = primary-color track, knob on right. Track is 36x16 pixels, knob is 14x16 pixels.
+
+**Keyboard:** Space key toggles the focused toggle switch.
 
 ## Layout Widgets
 
@@ -360,7 +398,7 @@ let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-**Focusable types:** Button, Checkbox, Text Input, Slider, Radio.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle.
 
 **Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
 
@@ -400,6 +438,11 @@ let key = ui_key_down()  // Get last key name (" " if none)
 | Enter | Button | Click (fires ui_button_clicked) |
 | Enter | TextInput | Submit (fires ui_textinput_submitted) |
 | Left/Right | Slider | Adjust value by 5% of range |
+| Left/Right | TextInput | Move cursor within text |
+| Home/End | TextInput | Jump to start/end of text |
+| Delete | TextInput | Delete character after cursor |
+| Space | Toggle | Toggle on/off state |
+| Escape | Dropdown | Close open dropdown |
 
 ## Tree Operations
 

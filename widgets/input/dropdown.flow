@@ -216,6 +216,14 @@ end
 fn ui_dropdown_process(mx, my, clicked)
   let dd_count = len(_ui_dd_triggers)
 
+  // Escape key closes any open dropdown
+  if _ui_dd_open_idx >= 0.0
+    if _ui_key_down == "escape"
+      let _c = ui_dd_close(_ui_dd_open_idx)
+      return 0.0
+    end
+  end
+
   // Check each dropdown's trigger button
   let mut di = 0.0
   while di < dd_count

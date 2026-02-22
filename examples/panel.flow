@@ -28,6 +28,7 @@ use "../widgets/input/textinput"
 use "../widgets/input/slider"
 use "../widgets/input/radio"
 use "../widgets/input/dropdown"
+use "../widgets/input/toggle"
 use "../widgets/layout/column"
 use "../widgets/layout/row"
 use "../state/reactive"
@@ -77,12 +78,12 @@ let name_row = ui_row(root, 12.0)
 let name_label = ui_text(name_row, "NAME", UI_COLOR_TEXT_DIM)
 let name_input = ui_textinput(name_row, 200.0, 26.0)
 
-// ── Toggles ──
-let chk_auto = ui_checkbox(root, "AUTO-SAVE")
-let _sca = ui_checkbox_set(chk_auto, 1.0)
-let chk_sound = ui_checkbox(root, "SOUND EFFECTS")
-let chk_tips = ui_checkbox(root, "SHOW TOOLTIPS")
-let _sct = ui_checkbox_set(chk_tips, 1.0)
+// ── Toggles (toggle switches) ──
+let tgl_auto = ui_toggle(root, "AUTO-SAVE")
+let _sta = ui_toggle_set(tgl_auto, 1.0)
+let tgl_sound = ui_toggle(root, "SOUND EFFECTS")
+let tgl_tips = ui_toggle(root, "SHOW TOOLTIPS")
+let _stt = ui_toggle_set(tgl_tips, 1.0)
 
 let sep3 = ui_separator(root, 428.0)
 
@@ -115,6 +116,7 @@ let btn_close = ui_button(btn_row, 90.0, 30.0, "CLOSE")
 // Initial layout
 let _l = ui_layout_update()
 let _su = ui_slider_update_all()
+let _tu = ui_toggle_update_all()
 
 // Sync progress simulation state
 let mut sync_active = 0.0
@@ -171,9 +173,9 @@ while running == 1.0
   end
 
   if ui_button_clicked(btn_reset) == 1.0
-    let _s1 = ui_checkbox_set(chk_auto, 1.0)
-    let _s2 = ui_checkbox_set(chk_sound, 0.0)
-    let _s3 = ui_checkbox_set(chk_tips, 1.0)
+    let _s1 = ui_toggle_set(tgl_auto, 1.0)
+    let _s2 = ui_toggle_set(tgl_sound, 0.0)
+    let _s3 = ui_toggle_set(tgl_tips, 1.0)
     let _s4 = ui_slider_set(vol_slider, 60.0)
     let _s5 = ui_dropdown_set(dd_theme, 0.0)
     let _s6 = ui_dropdown_set(dd_mode, 0.0)
