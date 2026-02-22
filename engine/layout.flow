@@ -60,16 +60,18 @@ fn ui_layout_update()
       let mut ki = 0.0
       while ki < count
         if _ui_parent[int(ki)] == ci
-          let cw = _ui_w[int(ki)]
-          let ch = _ui_h[int(ki)]
-          child_count = child_count + 1.0
-          sum_w = sum_w + cw
-          sum_h = sum_h + ch
-          if cw > max_w
-            max_w = cw
-          end
-          if ch > max_h
-            max_h = ch
+          if _ui_visible[int(ki)] == 1.0
+            let cw = _ui_w[int(ki)]
+            let ch = _ui_h[int(ki)]
+            child_count = child_count + 1.0
+            sum_w = sum_w + cw
+            sum_h = sum_h + ch
+            if cw > max_w
+              max_w = cw
+            end
+            if ch > max_h
+              max_h = ch
+            end
           end
         end
         ki = ki + 1.0
@@ -130,16 +132,18 @@ fn ui_layout_update()
       let mut ji = 0.0
       while ji < count
         if _ui_parent[int(ji)] == pi
-          _ui_x[int(ji)] = cur_x
-          _ui_y[int(ji)] = cur_y
+          if _ui_visible[int(ji)] == 1.0
+            _ui_x[int(ji)] = cur_x
+            _ui_y[int(ji)] = cur_y
 
-          if ptype == UI_COLUMN
-            // Advance cursor downward
-            cur_y = cur_y + _ui_h[int(ji)] + gap2
-          end
-          if ptype == UI_ROW
-            // Advance cursor rightward
-            cur_x = cur_x + _ui_w[int(ji)] + gap2
+            if ptype == UI_COLUMN
+              // Advance cursor downward
+              cur_y = cur_y + _ui_h[int(ji)] + gap2
+            end
+            if ptype == UI_ROW
+              // Advance cursor rightward
+              cur_x = cur_x + _ui_w[int(ji)] + gap2
+            end
           end
         end
         ji = ji + 1.0

@@ -346,3 +346,13 @@ end
 fn ui_mouse_down()
   return _ui_input[2]
 end
+
+// Check if mouse was just clicked this frame (transition from up to down)
+fn ui_mouse_clicked()
+  if _ui_input[2] == 1.0
+    if _ui_input[3] == 0.0
+      return 1.0
+    end
+  end
+  return 0.0
+end

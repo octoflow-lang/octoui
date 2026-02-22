@@ -267,6 +267,41 @@ let _s = ui_radio_set(group, 1.0)  // Select "OPTION B"
 
 **Keyboard:** Space key selects the focused radio button.
 
+### Dropdown — `widgets/input/dropdown.flow`
+
+A dropdown selector with a trigger button and a hidden option list.
+
+```
+use "octoui/widgets/input/dropdown"
+
+let dd = ui_dropdown(parent, 160.0, 28.0)
+let _o1 = ui_dropdown_option(dd, "DARK")
+let _o2 = ui_dropdown_option(dd, "LIGHT")
+let _o3 = ui_dropdown_option(dd, "AUTO")
+let _fin = ui_dropdown_finalize(dd)
+
+// In event loop (after ui_process_input):
+let _dp = ui_dropdown_process(ui_mouse_x(), ui_mouse_y(), ui_mouse_clicked())
+
+// Get selection:
+let sel = ui_dropdown_selected(dd)  // 0-based index
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Width in pixels
+- `h` — Height in pixels (trigger and option height)
+
+**Functions:**
+- `ui_dropdown(parent, w, h)` — Create dropdown, returns trigger widget ID
+- `ui_dropdown_option(trigger, label)` — Add an option (call in sequence, no interleaving)
+- `ui_dropdown_finalize(trigger)` — Set trigger text to first option
+- `ui_dropdown_selected(trigger)` — Get selected index (0-based)
+- `ui_dropdown_set(trigger, index)` — Set selection programmatically
+- `ui_dropdown_process(mx, my, clicked)` — Process clicks (call each frame)
+
+**Behavior:** Click trigger to open/close option list. Click option to select. Click outside to close. Only one dropdown open at a time.
+
 ## Layout Widgets
 
 ### Column — `widgets/layout/column.flow`
@@ -380,4 +415,7 @@ ui_tree_set_spacing(id, spacing)      // Set container spacing
 ui_tree_set_padding(id, padding)      // Set container padding
 ui_tree_count()                        // Total widget count
 ui_tree_is_container(id)              // Check if ROW or COLUMN
+ui_tree_set_visible(id, flag)         // Show (1.0) or hide (0.0) widget
 ```
+
+**Visibility:** Hidden widgets are skipped in rendering, layout sizing, layout positioning, and Tab navigation. Use `ui_tree_set_visible(id, 0.0)` to hide, `ui_tree_set_visible(id, 1.0)` to show.

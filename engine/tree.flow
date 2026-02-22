@@ -161,3 +161,13 @@ fn ui_tree_is_container(id)
   end
   return 0.0
 end
+
+// Set widget visibility (1.0 = visible, 0.0 = hidden)
+// Hidden widgets are skipped in rendering, layout sizing, and tab navigation.
+fn ui_tree_set_visible(id, flag)
+  let i = int(id)
+  _ui_visible[i] = flag
+  _ui_dirty[i] = 1.0
+  let _d = ui_mark_dirty()
+  return 0.0
+end

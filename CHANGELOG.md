@@ -34,8 +34,11 @@
 - Space key toggles focused checkboxes and radio buttons
 - Enter key submission for text inputs (ui_textinput_submitted)
 - Arrow key control for focused sliders (Left/Right adjusts value)
-- 10 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label
+- Dropdown select widget (trigger + option list, click-outside-to-close)
+- Dynamic visibility toggle (ui_tree_set_visible, layout-aware)
+- Mouse click detection helper (ui_mouse_clicked)
+- 11 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown
 - Full keyboard accessibility (Tab + Space + Enter + arrows)
-- Examples: hello, counter, dashboard, timer, form, settings
-- Documentation: quickstart, architecture, widgets (all widgets + keyboard)
+- Examples: hello, counter, dashboard, timer, form, settings, panel
+- Documentation: quickstart, architecture, widgets (all widgets + keyboard + dropdown)
 - Tests: 18/18 passing (12 tree + 6 kernel)
