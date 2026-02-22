@@ -17,8 +17,16 @@
 - Smart sleep (only when idle — zero latency on interaction frames)
 - Separator widget (2px horizontal line in border color)
 - Progress bar widget (track + fill, bind to reactive state)
+- Checkbox widget (toggle with label, click or programmatic)
+- Text input widget (single-line, keyboard input, cursor, focus system)
+- Slider widget (horizontal drag, configurable min/max, value display)
+- Focus system (click-to-focus, shared state in tree.flow)
 - Keyboard input support (ui_key_pressed, ui_key_down)
+- Mouse state queries (ui_mouse_x, ui_mouse_y, ui_mouse_down)
+- Multi-level layout nesting (reverse-order Pass 1 for correct sizing)
 - Text width auto-update on reactive state change (re-runs layout)
-- Examples: hello, counter, dashboard, timer
-- Documentation: quickstart, architecture, widgets (keyboard, separator, progress bar)
+- Hit test helper function (ui_hit_test)
+- 8 widget types: box, text, button, row, column, checkbox, textinput, slider
+- Examples: hello, counter, dashboard, timer, form
+- Documentation: quickstart, architecture, widgets (all Phase 2 input widgets)
 - Tests: 18/18 passing (12 tree + 6 kernel)

@@ -17,6 +17,12 @@ let UI_TEXT = 2.0
 let UI_BUTTON = 3.0
 let UI_ROW = 4.0
 let UI_COLUMN = 5.0
+let UI_CHECKBOX = 6.0
+let UI_TEXTINPUT = 7.0
+let UI_SLIDER = 8.0
+
+// -- Focus State (shared across modules) ------------------------------------
+let mut _ui_focus_id = -1.0
 
 // -- Parallel Arrays (Widget Registry) --------------------------------------
 // Every widget gets one entry at the same index across all arrays.

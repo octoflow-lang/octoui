@@ -1,0 +1,131 @@
+// widgets/input/textinput.flow — Single-Line Text Input Widget
+//
+// A focusable text input box. When focused, keyboard input appends characters
+// and backspace deletes the last character. Click to focus.
+//
+// Visual: surface-color background box, text rendered left-aligned,
+// blinking cursor when focused.
+
+use "../../engine/tree"
+use "../../engine/dirty"
+use "../../themes/dark"
+
+// Per-textinput value tracking (parallel to widget IDs)
+let mut _ui_ti_values = []
+
+// Create a text input widget
+// parent: parent widget ID
+// w: width in pixels
+// h: height in pixels (typically 28-36)
+// Returns: widget ID
+fn ui_textinput(parent, w, h)
+  let id = ui_tree_add(UI_TEXTINPUT, parent, w, h, " ")
+  let cr = ui_theme_r(UI_COLOR_SURFACE)
+  let cg = ui_theme_g(UI_COLOR_SURFACE)
+  let cb = ui_theme_b(UI_COLOR_SURFACE)
+  let _s = ui_tree_set_color(id, cr, cg, cb)
+
+  // Track value
+  let needed = id + 1.0
+  while len(_ui_ti_values) < needed
+    push(_ui_ti_values, " ")
+  end
+  _ui_ti_values[id] = " "
+
+  return id
+end
+
+// Get current text input value (returns string)
+fn ui_textinput_value(id)
+  if id < len(_ui_ti_values)
+    return _ui_ti_values[id]
+  end
+  return " "
+end
+
+// Set text input value
+fn ui_textinput_set(id, text)
+  let needed = id + 1.0
+  while len(_ui_ti_values) < needed
+    push(_ui_ti_values, " ")
+  end
+  _ui_ti_values[id] = text
+  _ui_texts[id] = text
+  _ui_dirty[id] = 1.0
+  let _d = ui_mark_dirty()
+  return 0.0
+end
+
+// Process keyboard input for focused text input
+// Call this each frame after ui_process_input()
+// key: the key name from ui_key_down()
+fn ui_textinput_process_key(key)
+  let focus = _ui_focus_id
+  if focus < 0.0
+    return 0.0
+  end
+  // Only process for TEXTINPUT widgets
+  if focus >= len(_ui_types)
+    return 0.0
+  end
+  if _ui_types[focus] != UI_TEXTINPUT
+    return 0.0
+  end
+
+  // Skip if no key pressed this frame
+  if key == " "
+    return 0.0
+  end
+
+  let current = _ui_ti_values[focus]
+  let cur_len = len(current)
+
+  // Backspace: remove last character
+  if key == "backspace"
+    if cur_len > 1.0
+      // Remove last character (keep at least the space placeholder)
+      let new_text = substring(current, 0.0, cur_len - 1.0)
+      _ui_ti_values[focus] = new_text
+      _ui_texts[focus] = new_text
+      _ui_dirty[focus] = 1.0
+      let _d = ui_mark_dirty()
+    end
+    if cur_len == 1.0
+      // At minimum length — set to space (empty)
+      _ui_ti_values[focus] = " "
+      _ui_texts[focus] = " "
+      _ui_dirty[focus] = 1.0
+      let _d = ui_mark_dirty()
+    end
+    return 0.0
+  end
+
+  // Space key
+  if key == "space"
+    let new_text = current + " "
+    _ui_ti_values[focus] = new_text
+    _ui_texts[focus] = new_text
+    _ui_dirty[focus] = 1.0
+    let _d = ui_mark_dirty()
+    return 0.0
+  end
+
+  // Single character keys (a-z, 0-9, etc.)
+  if len(key) == 1.0
+    let mut append_text = key
+    // If current is just the placeholder space, replace it
+    if current == " "
+      _ui_ti_values[focus] = append_text
+      _ui_texts[focus] = append_text
+    else
+      let new_text = current + append_text
+      _ui_ti_values[focus] = new_text
+      _ui_texts[focus] = new_text
+    end
+    _ui_dirty[focus] = 1.0
+    let _d = ui_mark_dirty()
+    return 0.0
+  end
+
+  return 0.0
+end

@@ -58,12 +58,12 @@ Widget IDs are array indices. No heap allocation, no GC.
 
 ### Layout Engine
 
-Phase 1 uses CPU layout (tree constraint propagation is inherently sequential, and <20 widgets has negligible CPU cost):
+CPU layout with multi-level nesting support (tree constraint propagation is inherently sequential, and <50 widgets has negligible CPU cost):
 
-- **Pass 1 (bottom-up)**: Compute container sizes from children
-- **Pass 2 (top-down)**: Assign absolute positions
+- **Pass 1 (bottom-up, reverse order)**: Compute container sizes from children. Iterates highest-ID first so inner containers are sized before outer ones.
+- **Pass 2 (top-down, forward order)**: Assign absolute positions. Iterates lowest-ID first so parents are positioned before children.
 
-Supports COLUMN (vertical stack) and ROW (horizontal stack) containers with spacing and padding.
+Supports COLUMN (vertical stack) and ROW (horizontal stack) containers with spacing and padding. Arbitrary nesting depth.
 
 ### Dirty System
 
@@ -144,13 +144,16 @@ octoui/
     dirty.flow       Frame-level dirty tracking
     font.flow        Bitmap font data (4x6, ASCII 32-95)
   widgets/
-    core/box.flow       Colored rectangle
-    core/text.flow      Text label
-    core/separator.flow Horizontal line (2px)
-    core/progress.flow  Progress bar (track + fill)
-    input/button.flow   Clickable button
-    layout/row.flow     Horizontal container
-    layout/column.flow  Vertical container
+    core/box.flow        Colored rectangle
+    core/text.flow       Text label
+    core/separator.flow  Horizontal line (2px)
+    core/progress.flow   Progress bar (track + fill)
+    input/button.flow    Clickable button
+    input/checkbox.flow  Checkbox toggle with label
+    input/textinput.flow Single-line text input
+    input/slider.flow    Draggable slider
+    layout/row.flow      Horizontal container
+    layout/column.flow   Vertical container
   themes/
     dark.flow        Dark color theme
   state/
@@ -164,6 +167,7 @@ octoui/
     counter.flow     Interactive counter (Phase 1 acceptance test)
     dashboard.flow   Multi-panel layout demo
     timer.flow       Countdown timer with progress bar
+    form.flow        Input widgets demo (checkbox, text input, slider)
   tests/
     test_tree.flow      Widget tree tests
     test_kernels.flow   GPU kernel tests

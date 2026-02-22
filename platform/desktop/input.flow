@@ -1,7 +1,7 @@
 // platform/desktop/input.flow — Input Event Processing
 //
 // Polls window events via window_poll(), performs hit testing,
-// updates widget hover/press/click states.
+// updates widget hover/press/click states, manages focus.
 //
 // Window API:
 //   window_poll() -> "none"|"close"|"key_down"|"key_up"|"mouse_move"|"mouse_down"|"mouse_up"|"resize"
@@ -11,6 +11,9 @@
 use "../../engine/tree"
 use "../../engine/dirty"
 use "../../widgets/input/button"
+use "../../widgets/input/checkbox"
+use "../../widgets/input/textinput"
+use "../../widgets/input/slider"
 
 // Mouse state: [0]=mouse_x [1]=mouse_y [2]=mouse_down [3]=prev_mouse_down
 let mut _ui_input = [0.0, 0.0, 0.0, 0.0]
@@ -18,6 +21,8 @@ let mut _ui_input = [0.0, 0.0, 0.0, 0.0]
 // Keyboard state: last key event
 let mut _ui_key_down = " "
 let mut _ui_key_up = " "
+
+// Focus state: _ui_focus_id is defined in tree.flow (shared)
 
 // Poll all pending window events and update mouse state
 // Returns 1.0 if window is still open, 0.0 if close requested
@@ -63,6 +68,20 @@ fn ui_poll_events()
   return alive
 end
 
+// Point-in-rect hit test helper
+fn ui_hit_test(mx, my, wx, wy, ww, wh)
+  if mx >= wx
+    if mx < wx + ww
+      if my >= wy
+        if my < wy + wh
+          return 1.0
+        end
+      end
+    end
+  end
+  return 0.0
+end
+
 // Process input: hit testing and widget state updates
 // Call after ui_poll_events() each frame
 fn ui_process_input()
@@ -72,7 +91,6 @@ fn ui_process_input()
   let prev_down = _ui_input[3]
 
   // Detect click: mouse just pressed (press-to-click for responsiveness)
-  // Fires on the SAME frame as the visual press, no 1-frame delay
   let mut clicked = 0.0
   if mdown == 1.0
     if prev_down == 0.0
@@ -83,31 +101,20 @@ fn ui_process_input()
   // Clear per-frame click states
   let _c = ui_button_clear_clicks()
 
+  // Track if any widget was clicked (for focus management)
+  let mut clicked_widget = -1.0
+
   // Hit test all widgets
   let n = ui_tree_count()
   let mut i = 0.0
   while i < n
     if _ui_visible[i] == 1.0
       let wtype = _ui_types[i]
-      // Only process interactive widgets (buttons)
-      if wtype == UI_BUTTON
-        let wx = _ui_x[i]
-        let wy = _ui_y[i]
-        let ww = _ui_w[i]
-        let wh = _ui_h[i]
-        let old_state = _ui_state[i]
 
-        // Point-in-rect hit test
-        let mut hit = 0.0
-        if mx >= wx
-          if mx < wx + ww
-            if my >= wy
-              if my < wy + wh
-                hit = 1.0
-              end
-            end
-          end
-        end
+      // ── Buttons ──
+      if wtype == UI_BUTTON
+        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+        let old_state = _ui_state[i]
 
         let mut new_state = 0.0
         if hit == 1.0
@@ -116,26 +123,80 @@ fn ui_process_input()
           else
             new_state = 1.0
           end
-          // Click: mouse was down on this widget, now released
           if clicked == 1.0
             let needed = i + 1.0
             while len(_ui_btn_clicked) < needed
               push(_ui_btn_clicked, 0.0)
             end
             _ui_btn_clicked[i] = 1.0
+            clicked_widget = i
           end
         end
 
-        // Update state if changed
         if new_state != old_state
           _ui_state[i] = new_state
           let _v = ui_button_update_visual(i)
           let _d = ui_mark_dirty()
         end
       end
+
+      // ── Checkboxes ──
+      if wtype == UI_CHECKBOX
+        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+
+        if hit == 1.0
+          if clicked == 1.0
+            let _t = ui_checkbox_toggle(i)
+            clicked_widget = i
+          end
+        end
+      end
+
+      // ── Text inputs ──
+      if wtype == UI_TEXTINPUT
+        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+
+        if hit == 1.0
+          if clicked == 1.0
+            clicked_widget = i
+          end
+        end
+      end
+
+      // ── Sliders ──
+      if wtype == UI_SLIDER
+        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+
+        if hit == 1.0
+          if mdown == 1.0
+            clicked_widget = i
+          end
+        end
+      end
     end
     i = i + 1.0
   end
+
+  // Update focus if a widget was clicked
+  if clicked == 1.0
+    if clicked_widget != _ui_focus_id
+      _ui_focus_id = clicked_widget
+      let _d = ui_mark_dirty()
+    end
+  end
+
+  return 0.0
+end
+
+// Get current focused widget ID (-1 if none)
+fn ui_get_focus()
+  return _ui_focus_id
+end
+
+// Set focus to a specific widget
+fn ui_set_focus(widget_id)
+  _ui_focus_id = widget_id
+  let _d = ui_mark_dirty()
   return 0.0
 end
 
@@ -148,7 +209,21 @@ fn ui_key_pressed(key)
   return 0.0
 end
 
-// Get the last key pressed this frame (empty string if none)
+// Get the last key pressed this frame (" " if none)
 fn ui_key_down()
   return _ui_key_down
+end
+
+// Get mouse position
+fn ui_mouse_x()
+  return _ui_input[0]
+end
+
+fn ui_mouse_y()
+  return _ui_input[1]
+end
+
+// Check if mouse button is currently down
+fn ui_mouse_down()
+  return _ui_input[2]
 end

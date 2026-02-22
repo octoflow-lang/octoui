@@ -1,15 +1,17 @@
 // layout.flow — OctoUI CPU Iterative Layout Engine
 //
-// Two-pass layout for 2-level nesting (root containers -> leaf widgets).
+// Two-pass layout supporting multi-level nesting.
 // NOT recursive — uses flat iterative loops over the parallel arrays.
 //
-// Pass 1 (bottom-up): Compute container sizes from their children.
+// Pass 1 (bottom-up, REVERSE order): Compute container sizes from children.
+//   Iterates highest-ID first so inner containers are sized before outer ones.
 //   - UI_COLUMN: width = max(child widths) + 2*padding
 //                height = sum(child heights) + spacing*(n-1) + 2*padding
 //   - UI_ROW:    height = max(child heights) + 2*padding
 //                width = sum(child widths) + spacing*(n-1) + 2*padding
 //
-// Pass 2 (top-down): Position children inside their parent container.
+// Pass 2 (top-down, FORWARD order): Position children inside their parent.
+//   Iterates lowest-ID first so parents are positioned before children.
 //   - UI_COLUMN: stack children vertically (top to bottom)
 //   - UI_ROW:    stack children horizontally (left to right)
 //
@@ -29,11 +31,12 @@ fn ui_layout_update()
     return 0.0
   end
 
-  // ---- Pass 1: Bottom-up container sizing ---------------------------------
-  // For each container, scan all widgets to find its children,
-  // then compute the container's size from the children.
-  let mut ci = 0.0
-  while ci < count
+  // ---- Pass 1: Bottom-up container sizing (REVERSE order) -----------------
+  // Iterate highest-ID first: children always have higher IDs than parents
+  // (because ui_tree_add appends via push), so reverse order ensures inner
+  // containers are sized before outer ones read their dimensions.
+  let mut ci = count - 1.0
+  while ci >= 0.0
     let ctype = _ui_types[int(ci)]
     let mut do_size = 0.0
     if ctype == UI_COLUMN
@@ -95,7 +98,7 @@ fn ui_layout_update()
       end
     end
 
-    ci = ci + 1.0
+    ci = ci - 1.0
   end
 
   // ---- Pass 2: Top-down child positioning ---------------------------------

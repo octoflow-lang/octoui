@@ -9,6 +9,9 @@
 | UI_BUTTON | 3.0 | Clickable button |
 | UI_ROW | 4.0 | Horizontal container |
 | UI_COLUMN | 5.0 | Vertical container |
+| UI_CHECKBOX | 6.0 | Checkbox toggle |
+| UI_TEXTINPUT | 7.0 | Single-line text input |
+| UI_SLIDER | 8.0 | Draggable slider |
 
 ## Core Widgets
 
@@ -120,6 +123,93 @@ let _pu = ui_progress_update()                  // Sync fill width
 
 The track renders in border color, the fill in primary color.
 
+## Input Widgets
+
+### Checkbox — `widgets/input/checkbox.flow`
+
+A clickable toggle with label. Creates a row container with a 16x16 box and text.
+
+```
+use "octoui/widgets/input/checkbox"
+
+let chk = ui_checkbox(parent, "ENABLE SOUND")
+
+// Check state:
+if ui_checkbox_checked(chk) == 1.0
+  // Checkbox is checked
+end
+
+// Set programmatically:
+let _s = ui_checkbox_set(chk, 1.0)  // Check
+let _s = ui_checkbox_set(chk, 0.0)  // Uncheck
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `label` — Text shown next to checkbox
+
+**Visual:** Unchecked = border color box. Checked = primary color fill.
+Click toggles state automatically via the input system.
+
+### Text Input — `widgets/input/textinput.flow`
+
+A single-line text input with keyboard support. Click to focus, type to enter text.
+
+```
+use "octoui/widgets/input/textinput"
+
+let input = ui_textinput(parent, 200.0, 28.0)
+
+// In event loop:
+let key = ui_key_down()
+let _tk = ui_textinput_process_key(key)
+
+// Get value:
+let text = ui_textinput_value(input)
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Width in pixels
+- `h` — Height in pixels
+
+**Functions:**
+- `ui_textinput_value(id)` — Get current text
+- `ui_textinput_set(id, text)` — Set text programmatically
+- `ui_textinput_process_key(key)` — Process keyboard input for focused widget
+
+**Focus:** Click the text input to focus it. Only the focused input receives keyboard events. A cursor is displayed when focused.
+
+### Slider — `widgets/input/slider.flow`
+
+A horizontal slider for numeric input. Click and drag to change value.
+
+```
+use "octoui/widgets/input/slider"
+
+let slider = ui_slider(parent, 200.0, 16.0, 0.0, 100.0, 50.0)
+
+// In event loop:
+let _sp = ui_slider_process(ui_mouse_x(), ui_mouse_y(), ui_mouse_down())
+
+// Get value:
+let val = ui_slider_value(slider)
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Width in pixels
+- `h` — Height in pixels
+- `min_val` — Minimum value
+- `max_val` — Maximum value
+- `initial` — Initial value
+
+**Functions:**
+- `ui_slider_value(id)` — Get current value
+- `ui_slider_set(id, val)` — Set value programmatically
+- `ui_slider_process(mx, my, mdown)` — Process mouse drag (call each frame)
+- `ui_slider_update_all()` — Position all handles after layout
+
 ## Layout Widgets
 
 ### Column — `widgets/layout/column.flow`
@@ -168,6 +258,17 @@ ui_state_set(counter, ui_state_get(counter) + 1.0)  // Update
 ```
 
 When `ui_state_set` changes a value, all bound widgets automatically update their text and the frame is marked dirty.
+
+## Focus System
+
+Click on a focusable widget (text input) to give it keyboard focus.
+
+```
+let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
+let _sf = ui_set_focus(id)     // Set focus programmatically
+```
+
+Only the focused widget receives keyboard input. When focused, text inputs show a cursor.
 
 ## Keyboard Input
 

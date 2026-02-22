@@ -90,6 +90,9 @@ octoflow run octoui/examples/dashboard.flow --allow-read --allow-write --allow-f
 
 # Timer (countdown with progress bar, keyboard shortcuts)
 octoflow run octoui/examples/timer.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
+
+# Form (text input, checkbox, slider)
+octoflow run octoui/examples/form.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
 ```
 
 ## How It Works

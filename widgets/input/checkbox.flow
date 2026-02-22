@@ -1,0 +1,111 @@
+// widgets/input/checkbox.flow — Checkbox Toggle Widget
+//
+// A clickable checkbox with checked/unchecked visual states.
+// Rendered as a border-color box with a primary-color fill when checked.
+//
+// State: _ui_state[id] = 0.0 (unchecked) or 1.0 (checked)
+// The checkbox also responds to hover (border brightens).
+
+use "../../engine/tree"
+use "../../engine/dirty"
+use "../../themes/dark"
+
+// Per-checkbox checked state tracking
+let mut _ui_chk_checked = []
+
+// Create a checkbox with a text label
+// parent: parent widget ID
+// label: text shown next to checkbox
+// Returns: row widget ID (container for checkbox + label)
+// The actual checkbox box is at returned_id + 1
+fn ui_checkbox(parent, label)
+  // Create a row to hold checkbox box + label
+  let row = ui_tree_add(UI_ROW, parent, 0.0, 20.0, " ")
+  let _rs = ui_tree_set_spacing(row, 8.0)
+
+  // Checkbox box (16x16)
+  let box_id = ui_tree_add(UI_CHECKBOX, row, 16.0, 16.0, " ")
+  let br = ui_theme_r(UI_COLOR_BORDER)
+  let bg = ui_theme_g(UI_COLOR_BORDER)
+  let bb = ui_theme_b(UI_COLOR_BORDER)
+  let _bc = ui_tree_set_color(box_id, br, bg, bb)
+
+  // Label text
+  let lbl = ui_tree_add(UI_TEXT, row, len(label) * 10.0, 16.0, label)
+  let tr = ui_theme_r(UI_COLOR_TEXT)
+  let tg = ui_theme_g(UI_COLOR_TEXT)
+  let tb = ui_theme_b(UI_COLOR_TEXT)
+  let _tc = ui_tree_set_color(lbl, tr, tg, tb)
+
+  // Track checked state
+  let needed = box_id + 1.0
+  while len(_ui_chk_checked) < needed
+    push(_ui_chk_checked, 0.0)
+  end
+  _ui_chk_checked[box_id] = 0.0
+
+  return row
+end
+
+// Get checkbox box ID from the row container returned by ui_checkbox
+fn ui_checkbox_box_id(row_id)
+  return row_id + 1.0
+end
+
+// Check if checkbox is checked
+// row_id: the ID returned by ui_checkbox()
+fn ui_checkbox_checked(row_id)
+  let box_id = row_id + 1.0
+  if box_id < len(_ui_chk_checked)
+    return _ui_chk_checked[box_id]
+  end
+  return 0.0
+end
+
+// Set checkbox checked state
+fn ui_checkbox_set(row_id, checked)
+  let box_id = row_id + 1.0
+  let needed = box_id + 1.0
+  while len(_ui_chk_checked) < needed
+    push(_ui_chk_checked, 0.0)
+  end
+  _ui_chk_checked[box_id] = checked
+  let _v = ui_checkbox_update_visual(box_id)
+  let _d = ui_mark_dirty()
+  return 0.0
+end
+
+// Toggle checkbox state (called by input system on click)
+fn ui_checkbox_toggle(box_id)
+  let needed = box_id + 1.0
+  while len(_ui_chk_checked) < needed
+    push(_ui_chk_checked, 0.0)
+  end
+  if _ui_chk_checked[box_id] == 0.0
+    _ui_chk_checked[box_id] = 1.0
+  else
+    _ui_chk_checked[box_id] = 0.0
+  end
+  let _v = ui_checkbox_update_visual(box_id)
+  let _d = ui_mark_dirty()
+  return 0.0
+end
+
+// Update checkbox visual based on checked state
+fn ui_checkbox_update_visual(box_id)
+  let checked = _ui_chk_checked[box_id]
+  if checked == 1.0
+    // Checked: primary color fill
+    let cr = ui_theme_r(UI_COLOR_PRIMARY)
+    let cg = ui_theme_g(UI_COLOR_PRIMARY)
+    let cb = ui_theme_b(UI_COLOR_PRIMARY)
+    let _s = ui_tree_set_color(box_id, cr, cg, cb)
+  else
+    // Unchecked: border color (empty box)
+    let cr = ui_theme_r(UI_COLOR_BORDER)
+    let cg = ui_theme_g(UI_COLOR_BORDER)
+    let cb = ui_theme_b(UI_COLOR_BORDER)
+    let _s = ui_tree_set_color(box_id, cr, cg, cb)
+  end
+  return 0.0
+end
