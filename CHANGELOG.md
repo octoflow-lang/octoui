@@ -40,8 +40,10 @@
 - Toggle switch widget (on/off with sliding knob, click or Space to toggle)
 - Text input cursor movement (Left/Right, Home/End, insert/delete at position)
 - Escape key closes open dropdown
-- 12 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle
-- Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End)
-- Examples: hello, counter, dashboard, timer, form, settings, panel
-- Documentation: quickstart, architecture, widgets (all widgets + keyboard + dropdown + toggle)
+- Tab container widget (clickable tab buttons with switchable content panels)
+- Listbox widget (selectable list with Up/Down keyboard navigation and scroll viewport)
+- 14 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox
+- Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down)
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs
+- Documentation: quickstart, architecture, widgets (all widgets + keyboard + tabs + listbox)
 - Tests: 18/18 passing (12 tree + 6 kernel)

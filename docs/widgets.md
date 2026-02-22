@@ -14,6 +14,8 @@
 | UI_SLIDER | 8.0 | Draggable slider |
 | UI_RADIO | 9.0 | Radio button |
 | UI_TOGGLE | 10.0 | Toggle switch |
+| UI_TAB | 11.0 | Tab button |
+| UI_LISTBOX | 12.0 | Selectable list |
 
 ## Core Widgets
 
@@ -340,6 +342,92 @@ let _s = ui_toggle_set(tgl, 0.0)  // OFF
 
 **Keyboard:** Space key toggles the focused toggle switch.
 
+### Tab Container — `widgets/input/tabs.flow`
+
+A row of clickable tab buttons with switchable content panels. Only the active tab's panel is visible.
+
+```
+use "octoui/widgets/input/tabs"
+
+let tabs = ui_tabs(parent, 400.0)
+let _t1 = ui_tab(tabs, "GENERAL")
+let _t2 = ui_tab(tabs, "ADVANCED")
+let _t3 = ui_tab(tabs, "ABOUT")
+let _fin = ui_tabs_finalize(tabs)
+
+// Add widgets to each tab's content panel:
+let p1 = ui_tab_panel(tabs, 0.0)
+let _w1 = ui_text(p1, "GENERAL CONTENT", UI_COLOR_TEXT)
+
+// After layout:
+let _tu = ui_tabs_update_all()
+
+// In event loop (after ui_process_input):
+let _tp = ui_tabs_process()
+
+// Get selected tab:
+let sel = ui_tabs_selected(tabs)  // 0-based
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Total width of the tab container
+
+**Functions:**
+- `ui_tabs(parent, w)` — Create tab container, returns container widget ID
+- `ui_tab(tabs_id, label)` — Add a tab (returns panel widget ID)
+- `ui_tabs_finalize(tabs_id)` — Finalize after adding all tabs
+- `ui_tab_panel(tabs_id, index)` — Get content panel ID by index
+- `ui_tabs_selected(tabs_id)` — Get selected tab index (0-based)
+- `ui_tabs_set(tabs_id, index)` — Set active tab programmatically
+- `ui_tabs_process()` — Process tab clicks (call each frame)
+- `ui_tabs_update_all()` — Position panels after layout
+
+**Behavior:** Click a tab button to switch panels. Active tab button uses primary color, inactive tabs use surface color. Tab buttons are focusable and can be activated with Space/Enter.
+
+### Listbox — `widgets/input/listbox.flow`
+
+A selectable list of text items with a fixed viewport. Navigate with Up/Down arrow keys or click to select.
+
+```
+use "octoui/widgets/input/listbox"
+
+let lb = ui_listbox(parent, 200.0, 5.0)  // 200px wide, 5 visible rows
+let _o1 = ui_listbox_add(lb, "ITEM ONE")
+let _o2 = ui_listbox_add(lb, "ITEM TWO")
+let _o3 = ui_listbox_add(lb, "ITEM THREE")
+let _fin = ui_listbox_finalize(lb)
+
+// After layout:
+let _lu = ui_listbox_update_all()
+
+// In event loop:
+let _lp = ui_listbox_process(key)
+
+// Get selection:
+let sel = ui_listbox_selected(lb)  // 0-based index
+let text = ui_listbox_selected_text(lb)  // selected item text
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Width in pixels
+- `visible_rows` — Number of rows visible at once (viewport height)
+
+**Functions:**
+- `ui_listbox(parent, w, visible_rows)` — Create listbox, returns container widget ID
+- `ui_listbox_add(lb_id, text)` — Add an item
+- `ui_listbox_finalize(lb_id)` — Finalize and display initial items
+- `ui_listbox_selected(lb_id)` — Get selected index (0-based)
+- `ui_listbox_selected_text(lb_id)` — Get selected item text
+- `ui_listbox_set(lb_id, index)` — Set selection programmatically
+- `ui_listbox_process(key)` — Process keyboard input for focused listbox
+- `ui_listbox_update_all()` — Position display rows after layout
+
+**Keyboard:** Up/Down arrow keys navigate items. Selection auto-scrolls to keep the selected item visible.
+
+**Visual:** Selected item has primary color background. Items show in a fixed viewport; the list scrolls as you navigate past the visible area.
+
 ## Layout Widgets
 
 ### Column — `widgets/layout/column.flow`
@@ -398,7 +486,7 @@ let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox.
 
 **Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
 
@@ -443,6 +531,7 @@ let key = ui_key_down()  // Get last key name (" " if none)
 | Delete | TextInput | Delete character after cursor |
 | Space | Toggle | Toggle on/off state |
 | Escape | Dropdown | Close open dropdown |
+| Up/Down | Listbox | Navigate items (auto-scrolls viewport) |
 
 ## Tree Operations
 

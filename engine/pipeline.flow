@@ -115,6 +115,9 @@ fn ui_pipeline_render()
         if ftype == UI_TOGGLE
           draw_border = 1.0
         end
+        if ftype == UI_LISTBOX
+          draw_border = 1.0
+        end
         if draw_border == 1.0
           let bpad = 2.0
           _ui_pc_rect[0] = _ui_x[fi] - bpad
@@ -160,6 +163,9 @@ fn ui_pipeline_render()
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
       if wtype == UI_TOGGLE
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
+      if wtype == UI_LISTBOX
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
     end
