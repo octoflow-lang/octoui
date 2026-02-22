@@ -62,8 +62,12 @@
 - Table keyboard navigation (Up/Down/Home/End/PageUp/PageDown)
 - Tree view widget (hierarchical expand/collapse, virtual list, depth indentation)
 - Tree view keyboard navigation (Up/Down/Left/Right/Space/Home/End)
+- Widget disabled state (ui_tree_set_enabled — dimmed rendering, no input, no focus)
+- Disabled widgets blend 60% toward background color (rect) and use TEXT_DIM (text)
+- Tab navigation skips disabled widgets
+- Focus border hidden for disabled widgets
 - 19 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Tests: 18/18 passing (12 tree + 6 kernel)

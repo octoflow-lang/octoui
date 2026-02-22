@@ -105,7 +105,7 @@ fn ui_pipeline_render()
     if fi < len(_ui_types)
       if _ui_visible[fi] == 1.0
         let ftype = _ui_types[fi]
-        // Draw focus border for focusable widgets
+        // Draw focus border for focusable widgets (skip disabled)
         let mut draw_border = 0.0
         if ftype == UI_TEXTINPUT
           draw_border = 1.0
@@ -139,6 +139,11 @@ fn ui_pipeline_render()
         end
         if ftype == UI_TREEVIEW
           draw_border = 1.0
+        end
+        if draw_border == 1.0
+          if _ui_enabled[fi] == 0.0
+            draw_border = 0.0
+          end
         end
         if draw_border == 1.0
           let bpad = 2.0
@@ -509,9 +514,19 @@ fn ui_pipeline_dispatch_rect(vm, idx, screen_w, total)
   let y0 = _ui_y[idx]
   let rw = _ui_w[idx]
   let rh = _ui_h[idx]
-  let cr = _ui_colors_r[idx]
-  let cg = _ui_colors_g[idx]
-  let cb = _ui_colors_b[idx]
+  let mut cr = _ui_colors_r[idx]
+  let mut cg = _ui_colors_g[idx]
+  let mut cb = _ui_colors_b[idx]
+
+  // Dim disabled widgets (blend 60% toward background)
+  if _ui_enabled[idx] == 0.0
+    let dbg_r = ui_theme_r(UI_COLOR_BG)
+    let dbg_g = ui_theme_g(UI_COLOR_BG)
+    let dbg_b = ui_theme_b(UI_COLOR_BG)
+    cr = floor(cr * 0.4 + dbg_r * 0.6)
+    cg = floor(cg * 0.4 + dbg_g * 0.6)
+    cb = floor(cb * 0.4 + dbg_b * 0.6)
+  end
 
   _ui_pc_rect[0] = x0
   _ui_pc_rect[1] = y0
@@ -534,9 +549,17 @@ fn ui_pipeline_dispatch_text(vm, idx, screen_w, total)
   let text = _ui_texts[idx]
   let tx = _ui_x[idx]
   let ty = _ui_y[idx]
-  let cr = _ui_colors_r[idx]
-  let cg = _ui_colors_g[idx]
-  let cb = _ui_colors_b[idx]
+  let mut cr = _ui_colors_r[idx]
+  let mut cg = _ui_colors_g[idx]
+  let mut cb = _ui_colors_b[idx]
+
+  // Dim disabled text (use TEXT_DIM color)
+  if _ui_enabled[idx] == 0.0
+    cr = ui_theme_r(UI_COLOR_TEXT_DIM)
+    cg = ui_theme_g(UI_COLOR_TEXT_DIM)
+    cb = ui_theme_b(UI_COLOR_TEXT_DIM)
+  end
+
   let scale = 2.0
   let char_w = 5.0 * scale
 
@@ -600,10 +623,15 @@ fn ui_pipeline_dispatch_button_text(vm, idx, screen_w, total)
   let tx = bx + floor((bw - text_w) / 2.0)
   let ty = by + floor((bh - text_h) / 2.0)
 
-  // Use theme text color for button label
-  let cr = ui_theme_r(UI_COLOR_TEXT)
-  let cg = ui_theme_g(UI_COLOR_TEXT)
-  let cb = ui_theme_b(UI_COLOR_TEXT)
+  // Use dimmed color for disabled buttons, normal text color otherwise
+  let mut cr = ui_theme_r(UI_COLOR_TEXT)
+  let mut cg = ui_theme_g(UI_COLOR_TEXT)
+  let mut cb = ui_theme_b(UI_COLOR_TEXT)
+  if _ui_enabled[idx] == 0.0
+    cr = ui_theme_r(UI_COLOR_TEXT_DIM)
+    cg = ui_theme_g(UI_COLOR_TEXT_DIM)
+    cb = ui_theme_b(UI_COLOR_TEXT_DIM)
+  end
 
   let mut ci = 0.0
   while ci < tlen
@@ -658,10 +686,15 @@ fn ui_pipeline_dispatch_textinput_text(vm, idx, screen_w, total)
   let tx = bx + text_pad
   let ty = by + floor((bh - text_h) / 2.0)
 
-  // Use text color
-  let cr = ui_theme_r(UI_COLOR_TEXT)
-  let cg = ui_theme_g(UI_COLOR_TEXT)
-  let cb = ui_theme_b(UI_COLOR_TEXT)
+  // Use dimmed color for disabled text inputs
+  let mut cr = ui_theme_r(UI_COLOR_TEXT)
+  let mut cg = ui_theme_g(UI_COLOR_TEXT)
+  let mut cb = ui_theme_b(UI_COLOR_TEXT)
+  if _ui_enabled[idx] == 0.0
+    cr = ui_theme_r(UI_COLOR_TEXT_DIM)
+    cg = ui_theme_g(UI_COLOR_TEXT_DIM)
+    cb = ui_theme_b(UI_COLOR_TEXT_DIM)
+  end
 
   let tlen = len(text)
   let mut ti = 0.0
@@ -701,8 +734,11 @@ fn ui_pipeline_dispatch_textinput_text(vm, idx, screen_w, total)
     ti = ti + 1.0
   end
 
-  // Draw cursor if this widget has focus
+  // Draw cursor if this widget has focus and is enabled
   if idx == _ui_focus_id
+    if _ui_enabled[idx] == 0.0
+      return 0.0
+    end
     // Use cursor position from textinput module (if available)
     let mut cpos = tlen
     if idx < len(_ui_ti_cursor)

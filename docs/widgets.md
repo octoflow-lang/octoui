@@ -875,7 +875,10 @@ ui_tree_set_padding(id, padding)      // Set container padding
 ui_tree_count()                        // Total widget count
 ui_tree_is_container(id)              // Check if ROW or COLUMN
 ui_tree_set_visible(id, flag)         // Show (1.0) or hide (0.0) widget
+ui_tree_set_enabled(id, flag)         // Enable (1.0) or disable (0.0) widget
 ui_tree_is_descendant(widget, ancestor) // Check parent chain (up to 4 levels)
 ```
 
 **Visibility:** Hidden widgets are skipped in rendering, layout sizing, layout positioning, and Tab navigation. Use `ui_tree_set_visible(id, 0.0)` to hide, `ui_tree_set_visible(id, 1.0)` to show.
+
+**Disabled State:** Disabled widgets remain visible but render dimmed and do not accept input or focus. Rect colors blend 60% toward the background color. Text uses the TEXT_DIM color. Tab navigation skips disabled widgets. Focus is cleared if the currently focused widget is disabled. Use `ui_tree_set_enabled(id, 0.0)` to disable, `ui_tree_set_enabled(id, 1.0)` to re-enable.

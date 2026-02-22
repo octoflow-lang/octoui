@@ -127,8 +127,11 @@ fn ui_process_input()
   let mut i = 0.0
   while i < n
     if _ui_visible[i] == 1.0
-      // If modal is active, only process widgets inside the modal
+      // Skip disabled widgets and modal-external widgets
       let mut process_widget = 1.0
+      if _ui_enabled[i] == 0.0
+        process_widget = 0.0
+      end
       if modal_cid >= 0.0
         if ui_tree_is_descendant(i, modal_cid) == 0.0
           process_widget = 0.0
@@ -305,9 +308,12 @@ fn ui_process_input()
     let _tf = ui_tab_focus()
   end
 
-  // Keyboard activation: Space/Enter on focused widget
+  // Keyboard activation: Space/Enter on focused widget (skip disabled)
   if _ui_focus_id >= 0.0
     if _ui_focus_id < n
+      if _ui_enabled[_ui_focus_id] == 0.0
+        return 0.0
+      end
       let ftype = _ui_types[_ui_focus_id]
 
       // Space or Enter activates focused button
@@ -350,7 +356,7 @@ fn ui_process_input()
   return 0.0
 end
 
-// Check if a widget type is focusable
+// Check if a widget type is focusable (type-level only, does not check enabled)
 fn ui_is_focusable(wtype)
   if wtype == UI_BUTTON
     return 1.0
@@ -403,10 +409,12 @@ fn ui_tab_focus()
   let mut i = start
   while i < n
     if _ui_visible[i] == 1.0
-      if ui_is_focusable(_ui_types[i]) == 1.0
-        _ui_focus_id = i
-        let _d = ui_mark_dirty()
-        return 0.0
+      if _ui_enabled[i] == 1.0
+        if ui_is_focusable(_ui_types[i]) == 1.0
+          _ui_focus_id = i
+          let _d = ui_mark_dirty()
+          return 0.0
+        end
       end
     end
     i = i + 1.0
@@ -417,10 +425,12 @@ fn ui_tab_focus()
   while j < start
     if j < n
       if _ui_visible[j] == 1.0
-        if ui_is_focusable(_ui_types[j]) == 1.0
-          _ui_focus_id = j
-          let _d = ui_mark_dirty()
-          return 0.0
+        if _ui_enabled[j] == 1.0
+          if ui_is_focusable(_ui_types[j]) == 1.0
+            _ui_focus_id = j
+            let _d = ui_mark_dirty()
+            return 0.0
+          end
         end
       end
     end

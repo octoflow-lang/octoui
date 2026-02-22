@@ -50,6 +50,9 @@ let mut _ui_text_idx = []
 // Semantic color index (-1 = no semantic color / custom)
 let mut _ui_color_idx = []
 
+// Enabled state (1.0 = enabled, 0.0 = disabled)
+let mut _ui_enabled = []
+
 // Container layout properties
 let mut _ui_spacing = []
 let mut _ui_padding = []
@@ -98,6 +101,9 @@ fn ui_tree_add(wtype, parent, w, h, text)
 
   // Semantic color index
   push(_ui_color_idx, -1.0)
+
+  // Enabled state (default: enabled)
+  push(_ui_enabled, 1.0)
 
   // Container properties (spacing and padding)
   push(_ui_spacing, 0.0)
@@ -231,6 +237,22 @@ fn ui_tree_set_visible(id, flag)
   let i = int(id)
   _ui_visible[i] = flag
   _ui_dirty[i] = 1.0
+  let _d = ui_mark_dirty()
+  return 0.0
+end
+
+// Set widget enabled state (1.0 = enabled, 0.0 = disabled)
+// Disabled widgets render dimmed and do not accept input or focus.
+fn ui_tree_set_enabled(id, flag)
+  let i = int(id)
+  _ui_enabled[i] = flag
+  _ui_dirty[i] = 1.0
+  // Clear focus if disabling the currently focused widget
+  if flag == 0.0
+    if _ui_focus_id == i
+      _ui_focus_id = -1.0
+    end
+  end
   let _d = ui_mark_dirty()
   return 0.0
 end
