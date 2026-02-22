@@ -81,6 +81,26 @@ end
 - Hovered (1) — Hover color
 - Pressed (2) — Active color
 
+### Label — `widgets/core/label.flow`
+
+A convenience widget: dimmed label text on the left, colored value on the right.
+
+```
+use "octoui/widgets/core/label"
+
+let pair = ui_label(parent, "STATUS", "ACTIVE", UI_COLOR_PRIMARY)
+let _u = ui_label_set_value(pair, "INACTIVE")
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `label_text` — Dimmed text on the left
+- `value_text` — Value text on the right
+- `value_color` — Theme color for value text
+
+**Functions:**
+- `ui_label_set_value(row_id, new_text)` — Update the value text
+
 ### Separator — `widgets/core/separator.flow`
 
 A thin horizontal line for visual grouping between widgets.
@@ -210,6 +230,33 @@ let val = ui_slider_value(slider)
 - `ui_slider_process(mx, my, mdown)` — Process mouse drag (call each frame)
 - `ui_slider_update_all()` — Position all handles after layout
 
+### Radio Button — `widgets/input/radio.flow`
+
+Mutually exclusive selection within a group.
+
+```
+use "octoui/widgets/input/radio"
+
+let group = ui_radio_group(parent)
+let _r1 = ui_radio(group, "OPTION A")
+let _r2 = ui_radio(group, "OPTION B")
+let _r3 = ui_radio(group, "OPTION C")
+
+// Get selected index (0-based):
+let sel = ui_radio_selected(group)
+
+// Set programmatically:
+let _s = ui_radio_set(group, 1.0)  // Select "OPTION B"
+```
+
+**Functions:**
+- `ui_radio_group(parent)` — Create a radio group (column container)
+- `ui_radio(group, label)` — Add an option to the group
+- `ui_radio_selected(group)` — Get selected index (0-based)
+- `ui_radio_set(group, index)` — Set selection programmatically
+
+**Visual:** Unselected = border color box. Selected = primary color fill. First option is selected by default.
+
 ## Layout Widgets
 
 ### Column — `widgets/layout/column.flow`
@@ -261,14 +308,18 @@ When `ui_state_set` changes a value, all bound widgets automatically update thei
 
 ## Focus System
 
-Click on a focusable widget (text input) to give it keyboard focus.
+Click on any interactive widget to give it keyboard focus. Press **Tab** to cycle focus through all focusable widgets.
 
 ```
 let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-Only the focused widget receives keyboard input. When focused, text inputs show a cursor.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio.
+
+**Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
+
+**Tab navigation:** The Tab key cycles focus forward through all visible focusable widgets, wrapping around at the end.
 
 ## Keyboard Input
 

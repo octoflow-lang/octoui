@@ -26,7 +26,11 @@
 - Multi-level layout nesting (reverse-order Pass 1 for correct sizing)
 - Text width auto-update on reactive state change (re-runs layout)
 - Hit test helper function (ui_hit_test)
-- 8 widget types: box, text, button, row, column, checkbox, textinput, slider
-- Examples: hello, counter, dashboard, timer, form
-- Documentation: quickstart, architecture, widgets (all Phase 2 input widgets)
+- Radio button group widget (mutually exclusive selection)
+- Label widget (dimmed label + colored value pair)
+- Tab key navigation (cycles focus through all focusable widgets)
+- Focus border highlight (2px primary-color border on focused widget)
+- 10 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label
+- Examples: hello, counter, dashboard, timer, form, settings
+- Documentation: quickstart, architecture, widgets (all Phase 3 widgets)
 - Tests: 18/18 passing (12 tree + 6 kernel)

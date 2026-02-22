@@ -89,6 +89,48 @@ fn ui_pipeline_render()
   let wg_clear = floor((total + 255.0) / 256.0)
   let _dc = vm_dispatch(vm, _ui_spv_clear, _ui_pc_clear, wg_clear)
 
+  // ── 1b. Draw focus border (before widget rects so it appears behind) ──
+  if _ui_focus_id >= 0.0
+    let fi = _ui_focus_id
+    if fi < len(_ui_types)
+      if _ui_visible[fi] == 1.0
+        let ftype = _ui_types[fi]
+        // Draw focus border for focusable widgets
+        let mut draw_border = 0.0
+        if ftype == UI_TEXTINPUT
+          draw_border = 1.0
+        end
+        if ftype == UI_SLIDER
+          draw_border = 1.0
+        end
+        if ftype == UI_BUTTON
+          draw_border = 1.0
+        end
+        if ftype == UI_CHECKBOX
+          draw_border = 1.0
+        end
+        if ftype == UI_RADIO
+          draw_border = 1.0
+        end
+        if draw_border == 1.0
+          let bpad = 2.0
+          _ui_pc_rect[0] = _ui_x[fi] - bpad
+          _ui_pc_rect[1] = _ui_y[fi] - bpad
+          _ui_pc_rect[2] = _ui_w[fi] + bpad * 2.0
+          _ui_pc_rect[3] = _ui_h[fi] + bpad * 2.0
+          _ui_pc_rect[4] = ui_theme_r(UI_COLOR_PRIMARY)
+          _ui_pc_rect[5] = ui_theme_g(UI_COLOR_PRIMARY)
+          _ui_pc_rect[6] = ui_theme_b(UI_COLOR_PRIMARY)
+          _ui_pc_rect[7] = w
+          _ui_pc_rect[8] = total
+          let bpixels = ((_ui_w[fi] + bpad * 2.0) * (_ui_h[fi] + bpad * 2.0))
+          let bwg = floor((bpixels + 255.0) / 256.0)
+          let _db = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, bwg)
+        end
+      end
+    end
+  end
+
   // ── 2. Draw widget rectangles ──
   let n = ui_tree_count()
   let mut i = 0.0
@@ -109,6 +151,9 @@ fn ui_pipeline_render()
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
       if wtype == UI_SLIDER
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
+      if wtype == UI_RADIO
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
     end

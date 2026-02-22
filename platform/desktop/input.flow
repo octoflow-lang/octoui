@@ -14,6 +14,7 @@ use "../../widgets/input/button"
 use "../../widgets/input/checkbox"
 use "../../widgets/input/textinput"
 use "../../widgets/input/slider"
+use "../../widgets/input/radio"
 
 // Mouse state: [0]=mouse_x [1]=mouse_y [2]=mouse_down [3]=prev_mouse_down
 let mut _ui_input = [0.0, 0.0, 0.0, 0.0]
@@ -173,6 +174,18 @@ fn ui_process_input()
           end
         end
       end
+
+      // ── Radio buttons ──
+      if wtype == UI_RADIO
+        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+
+        if hit == 1.0
+          if clicked == 1.0
+            let _rc = ui_radio_click(i)
+            clicked_widget = i
+          end
+        end
+      end
     end
     i = i + 1.0
   end
@@ -183,6 +196,73 @@ fn ui_process_input()
       _ui_focus_id = clicked_widget
       let _d = ui_mark_dirty()
     end
+  end
+
+  // Tab navigation: cycle focus through focusable widgets
+  if _ui_key_down == "tab"
+    let _tf = ui_tab_focus()
+  end
+
+  return 0.0
+end
+
+// Check if a widget type is focusable
+fn ui_is_focusable(wtype)
+  if wtype == UI_BUTTON
+    return 1.0
+  end
+  if wtype == UI_CHECKBOX
+    return 1.0
+  end
+  if wtype == UI_TEXTINPUT
+    return 1.0
+  end
+  if wtype == UI_SLIDER
+    return 1.0
+  end
+  if wtype == UI_RADIO
+    return 1.0
+  end
+  return 0.0
+end
+
+// Cycle focus to next focusable widget
+fn ui_tab_focus()
+  let n = ui_tree_count()
+  let cur = _ui_focus_id
+
+  // Find the next focusable widget after current focus
+  let mut start = cur + 1.0
+  if start < 0.0
+    start = 0.0
+  end
+
+  // Search from start to end
+  let mut i = start
+  while i < n
+    if _ui_visible[i] == 1.0
+      if ui_is_focusable(_ui_types[i]) == 1.0
+        _ui_focus_id = i
+        let _d = ui_mark_dirty()
+        return 0.0
+      end
+    end
+    i = i + 1.0
+  end
+
+  // Wrap around: search from 0 to start
+  let mut j = 0.0
+  while j < start
+    if j < n
+      if _ui_visible[j] == 1.0
+        if ui_is_focusable(_ui_types[j]) == 1.0
+          _ui_focus_id = j
+          let _d = ui_mark_dirty()
+          return 0.0
+        end
+      end
+    end
+    j = j + 1.0
   end
 
   return 0.0

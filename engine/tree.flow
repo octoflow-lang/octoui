@@ -20,6 +20,7 @@ let UI_COLUMN = 5.0
 let UI_CHECKBOX = 6.0
 let UI_TEXTINPUT = 7.0
 let UI_SLIDER = 8.0
+let UI_RADIO = 9.0
 
 // -- Focus State (shared across modules) ------------------------------------
 let mut _ui_focus_id = -1.0
