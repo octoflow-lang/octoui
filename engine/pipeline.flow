@@ -20,6 +20,7 @@ use "../widgets/core/notification"
 use "../widgets/core/modal"
 use "../widgets/layout/scroll"
 use "../widgets/data/table"
+use "../widgets/data/treeview"
 
 // VM state: [0]=vm_id [1]=screen_w [2]=screen_h [3]=initialized [4]=total_pixels
 let mut _ui_vm = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -136,6 +137,9 @@ fn ui_pipeline_render()
         if ftype == UI_TABLE
           draw_border = 1.0
         end
+        if ftype == UI_TREEVIEW
+          draw_border = 1.0
+        end
         if draw_border == 1.0
           let bpad = 2.0
           _ui_pc_rect[0] = _ui_x[fi] - bpad
@@ -193,6 +197,9 @@ fn ui_pipeline_render()
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
       if wtype == UI_TABLE
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
+      if wtype == UI_TREEVIEW
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
     end
@@ -433,6 +440,9 @@ fn ui_pipeline_render()
             end
           end
           if mwtype == UI_TABLE
+            mdraw = 1.0
+          end
+          if mwtype == UI_TREEVIEW
             mdraw = 1.0
           end
           if mdraw == 1.0

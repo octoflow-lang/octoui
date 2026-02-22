@@ -60,8 +60,10 @@
 - Cell-by-cell row construction (auto-wraps at column count)
 - Alternating row colors (BG/SURFACE striping)
 - Table keyboard navigation (Up/Down/Home/End/PageUp/PageDown)
-- 18 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table
+- Tree view widget (hierarchical expand/collapse, virtual list, depth indentation)
+- Tree view keyboard navigation (Up/Down/Left/Right/Space/Home/End)
+- 19 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Tests: 18/18 passing (12 tree + 6 kernel)

@@ -19,6 +19,7 @@
 | UI_SPINBOX | 13.0 | Numeric up/down |
 | UI_SCROLL | 14.0 | Scroll container |
 | UI_TABLE | 15.0 | Data table |
+| UI_TREEVIEW | 16.0 | Tree view |
 
 ## Core Widgets
 
@@ -719,6 +720,62 @@ let sel = ui_table_selected_row(tbl)   // -1 if none
 - Virtual list: only viewport rows have render widgets
 - Auto-scrolling to keep selection visible
 
+### Tree View — `widgets/data/treeview.flow`
+
+A hierarchical tree view with expandable/collapsible nodes. Uses virtual-list pattern — only visible rows have render widgets. Nodes must be added in topological order (parent before children).
+
+```
+use "octoui/widgets/data/treeview"
+
+// Create tree view (240px viewport, 20px rows)
+let tree = ui_treeview(parent, 240.0, 20.0)
+
+// Build hierarchy
+let root = ui_treeview_node(tree, -1.0, "PROJECT")
+let src  = ui_treeview_node(tree, root, "SRC")
+let _f1  = ui_treeview_node(tree, src, "MAIN.FLOW")
+let _f2  = ui_treeview_node(tree, src, "TEST.FLOW")
+let docs = ui_treeview_node(tree, root, "DOCS")
+let _d1  = ui_treeview_node(tree, docs, "README.MD")
+let _fin = ui_treeview_finalize(tree)
+
+// After layout, refresh:
+let _l = ui_layout_update()
+let _r = ui_treeview_refresh_all()
+
+// In event loop:
+let _tp = ui_treeview_process(mx, my, clicked)
+let _tk = ui_treeview_process_key(key)
+
+// Get selection:
+let sel = ui_treeview_selected(tree)     // absolute node index (-1 if none)
+let label = ui_treeview_label(sel)       // node label text
+```
+
+**Functions:**
+
+| Function | Returns | Description |
+|----------|---------|-------------|
+| `ui_treeview(parent, body_h, row_h)` | tree ID | Create tree view container |
+| `ui_treeview_node(tree, parent_node, label)` | node index | Add a node (-1.0 = root level) |
+| `ui_treeview_finalize(tree)` | 0.0 | Compute depths, create display rows |
+| `ui_treeview_refresh(tree)` | 0.0 | Update display positions |
+| `ui_treeview_refresh_all()` | 0.0 | Refresh all tree views |
+| `ui_treeview_selected(tree)` | node index | Get selected node (-1 = none) |
+| `ui_treeview_label(node)` | string | Get node label text |
+| `ui_treeview_toggle(tree, node)` | 0.0 | Toggle expand/collapse |
+| `ui_treeview_process(mx, my, clicked)` | 0.0 | Process mouse clicks |
+| `ui_treeview_process_key(key)` | 0.0 | Process keyboard navigation |
+
+**Features:**
+- Depth indentation (16px per level)
+- Expand/collapse icons: `+` (collapsed), `-` (expanded), space (leaf)
+- Click to select, Space to toggle expand/collapse
+- Left arrow: collapse or select parent
+- Right arrow: expand or select first child
+- Virtual list: only viewport rows have render widgets
+- Auto-scrolling to keep selection visible
+
 ---
 
 ## Reactive State
@@ -742,7 +799,7 @@ let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox, Scroll, Table.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox, Scroll, Table, TreeView.
 
 **Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
 
@@ -795,6 +852,11 @@ let key = ui_key_down()  // Get last key name (" " if none)
 | Up/Down | Table | Move row selection |
 | PageUp/Down | Table | Jump selection by viewport rows |
 | Home/End | Table | Select first/last row |
+| Up/Down | TreeView | Navigate visible nodes |
+| Left | TreeView | Collapse node or select parent |
+| Right | TreeView | Expand node or select first child |
+| Space | TreeView | Toggle expand/collapse |
+| Home/End | TreeView | Select first/last visible node |
 | Escape | Modal | Close active modal dialog |
 
 ## Tree Operations
