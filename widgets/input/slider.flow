@@ -30,17 +30,11 @@ let UI_SLIDER_HANDLE_W = 12.0
 fn ui_slider(parent, w, h, min_val, max_val, initial)
   // Track
   let track = ui_tree_add(UI_SLIDER, parent, w, h, " ")
-  let tr = ui_theme_r(UI_COLOR_BORDER)
-  let tg = ui_theme_g(UI_COLOR_BORDER)
-  let tb = ui_theme_b(UI_COLOR_BORDER)
-  let _tc = ui_tree_set_color(track, tr, tg, tb)
+  let _tc = ui_tree_set_color_themed(track, UI_COLOR_BORDER)
 
   // Handle
   let handle = ui_tree_add(UI_BOX, track, UI_SLIDER_HANDLE_W, h, " ")
-  let hr = ui_theme_r(UI_COLOR_PRIMARY)
-  let hg = ui_theme_g(UI_COLOR_PRIMARY)
-  let hb = ui_theme_b(UI_COLOR_PRIMARY)
-  let _hc = ui_tree_set_color(handle, hr, hg, hb)
+  let _hc = ui_tree_set_color_themed(handle, UI_COLOR_PRIMARY)
 
   // Store slider data
   let needed = track + 1.0

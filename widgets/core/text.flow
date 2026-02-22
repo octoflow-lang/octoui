@@ -19,9 +19,6 @@ fn ui_text(parent, content, color_idx)
   let text_w = len(content) * char_w
   let text_h = 6.0 * scale + 4.0
   let id = ui_tree_add(UI_TEXT, parent, text_w, text_h, content)
-  let cr = ui_theme_r(color_idx)
-  let cg = ui_theme_g(color_idx)
-  let cb = ui_theme_b(color_idx)
-  let _s = ui_tree_set_color(id, cr, cg, cb)
+  let _s = ui_tree_set_color_themed(id, color_idx)
   return id
 end

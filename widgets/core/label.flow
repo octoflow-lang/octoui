@@ -23,17 +23,11 @@ fn ui_label(parent, label_text, value_text, value_color)
 
   // Label (dimmed)
   let lbl = ui_tree_add(UI_TEXT, row, len(label_text) * 10.0, 16.0, label_text)
-  let lr = ui_theme_r(UI_COLOR_TEXT_DIM)
-  let lg = ui_theme_g(UI_COLOR_TEXT_DIM)
-  let lb = ui_theme_b(UI_COLOR_TEXT_DIM)
-  let _lc = ui_tree_set_color(lbl, lr, lg, lb)
+  let _lc = ui_tree_set_color_themed(lbl, UI_COLOR_TEXT_DIM)
 
   // Value (colored)
   let val = ui_tree_add(UI_TEXT, row, len(value_text) * 10.0, 16.0, value_text)
-  let vr = ui_theme_r(value_color)
-  let vg = ui_theme_g(value_color)
-  let vb = ui_theme_b(value_color)
-  let _vc = ui_tree_set_color(val, vr, vg, vb)
+  let _vc = ui_tree_set_color_themed(val, value_color)
 
   return row
 end

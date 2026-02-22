@@ -12,9 +12,6 @@ use "../../themes/dark"
 // Returns: widget ID
 fn ui_separator(parent, w)
   let id = ui_tree_add(UI_BOX, parent, w, 2.0, " ")
-  let cr = ui_theme_r(UI_COLOR_BORDER)
-  let cg = ui_theme_g(UI_COLOR_BORDER)
-  let cb = ui_theme_b(UI_COLOR_BORDER)
-  let _s = ui_tree_set_color(id, cr, cg, cb)
+  let _s = ui_tree_set_color_themed(id, UI_COLOR_BORDER)
   return id
 end

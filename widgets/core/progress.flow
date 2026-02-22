@@ -27,17 +27,11 @@ let mut _ui_prog_width = []
 fn ui_progress(parent, w, h)
   // Track (background)
   let track = ui_tree_add(UI_BOX, parent, w, h, " ")
-  let tr = ui_theme_r(UI_COLOR_BORDER)
-  let tg = ui_theme_g(UI_COLOR_BORDER)
-  let tb = ui_theme_b(UI_COLOR_BORDER)
-  let _tc = ui_tree_set_color(track, tr, tg, tb)
+  let _tc = ui_tree_set_color_themed(track, UI_COLOR_BORDER)
 
   // Fill (foreground) — starts at 0 width
   let fill = ui_tree_add(UI_BOX, track, 0.0, h, " ")
-  let fr = ui_theme_r(UI_COLOR_PRIMARY)
-  let fg = ui_theme_g(UI_COLOR_PRIMARY)
-  let fb = ui_theme_b(UI_COLOR_PRIMARY)
-  let _fc = ui_tree_set_color(fill, fr, fg, fb)
+  let _fc = ui_tree_set_color_themed(fill, UI_COLOR_PRIMARY)
 
   return track
 end

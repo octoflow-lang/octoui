@@ -47,6 +47,9 @@ let mut _ui_colors_b = []
 let mut _ui_texts = []
 let mut _ui_text_idx = []
 
+// Semantic color index (-1 = no semantic color / custom)
+let mut _ui_color_idx = []
+
 // Container layout properties
 let mut _ui_spacing = []
 let mut _ui_padding = []
@@ -93,6 +96,9 @@ fn ui_tree_add(wtype, parent, w, h, text)
   push(_ui_texts, text)
   push(_ui_text_idx, 0.0)
 
+  // Semantic color index
+  push(_ui_color_idx, -1.0)
+
   // Container properties (spacing and padding)
   push(_ui_spacing, 0.0)
   push(_ui_padding, 0.0)
@@ -106,6 +112,33 @@ fn ui_tree_set_color(id, r, g, b)
   _ui_colors_g[i] = g
   _ui_colors_b[i] = b
   _ui_dirty[i] = 1.0
+  return 0.0
+end
+
+// Set color by semantic index (records for theme switching)
+fn ui_tree_set_color_themed(id, color_idx)
+  let i = int(id)
+  _ui_colors_r[i] = ui_theme_r(color_idx)
+  _ui_colors_g[i] = ui_theme_g(color_idx)
+  _ui_colors_b[i] = ui_theme_b(color_idx)
+  _ui_color_idx[i] = color_idx
+  _ui_dirty[i] = 1.0
+  return 0.0
+end
+
+// Re-apply theme colors to all widgets that have a semantic color index
+fn ui_theme_apply_all()
+  let n = len(_ui_types)
+  let mut i = 0.0
+  while i < n
+    let cidx = _ui_color_idx[i]
+    if cidx >= 0.0
+      _ui_colors_r[i] = ui_theme_r(cidx)
+      _ui_colors_g[i] = ui_theme_g(cidx)
+      _ui_colors_b[i] = ui_theme_b(cidx)
+    end
+    i = i + 1.0
+  end
   return 0.0
 end
 

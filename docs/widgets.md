@@ -508,18 +508,58 @@ let row = ui_row(parent, 20.0)  // 20px spacing between children
 
 ## Theme Colors
 
-Defined in `themes/dark.flow`:
+Defined in `themes/dark.flow` and `themes/light.flow`:
 
-| Constant | Index | RGB | Description |
-|----------|-------|-----|-------------|
-| UI_COLOR_BG | 0 | (30, 30, 35) | Window background |
-| UI_COLOR_SURFACE | 1 | (45, 45, 50) | Widget surface |
-| UI_COLOR_PRIMARY | 2 | (90, 130, 240) | Primary accent |
-| UI_COLOR_TEXT | 3 | (220, 222, 228) | Main text |
-| UI_COLOR_TEXT_DIM | 4 | (140, 142, 148) | Dimmed text |
-| UI_COLOR_BORDER | 5 | (80, 82, 88) | Borders |
-| UI_COLOR_HOVER | 6 | (75, 78, 85) | Hover state |
-| UI_COLOR_ACTIVE | 7 | (90, 130, 240) | Active/pressed |
+| Constant | Index | Dark RGB | Light RGB | Description |
+|----------|-------|----------|-----------|-------------|
+| UI_COLOR_BG | 0 | (30, 30, 35) | (240, 240, 245) | Window background |
+| UI_COLOR_SURFACE | 1 | (45, 45, 50) | (220, 220, 228) | Widget surface |
+| UI_COLOR_PRIMARY | 2 | (90, 130, 240) | (60, 100, 220) | Primary accent |
+| UI_COLOR_TEXT | 3 | (220, 222, 228) | (30, 30, 35) | Main text |
+| UI_COLOR_TEXT_DIM | 4 | (140, 142, 148) | (100, 102, 108) | Dimmed text |
+| UI_COLOR_BORDER | 5 | (80, 82, 88) | (180, 182, 188) | Borders |
+| UI_COLOR_HOVER | 6 | (75, 78, 85) | (200, 202, 210) | Hover state |
+| UI_COLOR_ACTIVE | 7 | (90, 130, 240) | (60, 100, 220) | Active/pressed |
+
+### Runtime Theme Switching
+
+Switch themes at runtime using the light theme module:
+
+```
+use "octoui/themes/light"
+
+// Switch to light theme
+let _lt = ui_theme_load_light()
+let _ta = ui_theme_apply_all()
+let _d = ui_mark_dirty()
+
+// Switch back to dark
+let _dt = ui_theme_load_dark()
+let _ta2 = ui_theme_apply_all()
+let _d2 = ui_mark_dirty()
+```
+
+**How it works:** All widgets use `ui_tree_set_color_themed(id, color_idx)` which records the semantic color index. When the theme palette changes, `ui_theme_apply_all()` walks the entire widget tree and re-applies colors from the new palette.
+
+### Notification — `widgets/core/notification.flow`
+
+Pop-up toast notifications at the top-right of the screen.
+
+```
+use "octoui/widgets/core/notification"
+
+// Queue a notification (shows for ~3 seconds)
+let _n = ui_notify("SAVED", UI_COLOR_PRIMARY)
+
+// In event loop:
+let _np = ui_notify_process()
+```
+
+**Functions:**
+- `ui_notify(text, color_idx)` — Queue a notification with background color
+- `ui_notify_process()` — Update notification state each frame
+
+**Behavior:** Notifications appear at the top-right corner, auto-dismiss after ~3 seconds (~180 frames). If multiple notifications are queued, they display one at a time in FIFO order. Notifications render as overlay on top of all other widgets.
 
 ## Reactive State
 
@@ -596,7 +636,8 @@ Low-level tree functions (from `engine/tree.flow`):
 
 ```
 ui_tree_add(type, parent, w, h, text)  // Add widget → returns ID
-ui_tree_set_color(id, r, g, b)         // Set RGB color
+ui_tree_set_color(id, r, g, b)         // Set RGB color (custom)
+ui_tree_set_color_themed(id, color_idx)  // Set color by theme index (tracks for theme switch)
 ui_tree_set_text(id, text)             // Update text content
 ui_tree_set_pos(id, x, y)             // Set position
 ui_tree_set_size(id, w, h)            // Set size

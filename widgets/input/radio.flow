@@ -75,23 +75,14 @@ fn ui_radio(group, label)
   // Set initial visual
   if btn_idx == 0.0
     // First button is selected by default
-    let cr = ui_theme_r(UI_COLOR_PRIMARY)
-    let cg = ui_theme_g(UI_COLOR_PRIMARY)
-    let cb = ui_theme_b(UI_COLOR_PRIMARY)
-    let _sc = ui_tree_set_color(dot, cr, cg, cb)
+    let _sc = ui_tree_set_color_themed(dot, UI_COLOR_PRIMARY)
   else
-    let cr = ui_theme_r(UI_COLOR_BORDER)
-    let cg = ui_theme_g(UI_COLOR_BORDER)
-    let cb = ui_theme_b(UI_COLOR_BORDER)
-    let _sc = ui_tree_set_color(dot, cr, cg, cb)
+    let _sc = ui_tree_set_color_themed(dot, UI_COLOR_BORDER)
   end
 
   // Label text
   let lbl = ui_tree_add(UI_TEXT, row, len(label) * 10.0, 16.0, label)
-  let tr = ui_theme_r(UI_COLOR_TEXT)
-  let tg = ui_theme_g(UI_COLOR_TEXT)
-  let tb = ui_theme_b(UI_COLOR_TEXT)
-  let _tc = ui_tree_set_color(lbl, tr, tg, tb)
+  let _tc = ui_tree_set_color_themed(lbl, UI_COLOR_TEXT)
 
   return row
 end
@@ -147,15 +138,9 @@ fn ui_radio_update_visuals(group)
       let dot = _ui_radio_btns[i]
       let idx = _ui_radio_btn_index[i]
       if idx == selected
-        let cr = ui_theme_r(UI_COLOR_PRIMARY)
-        let cg = ui_theme_g(UI_COLOR_PRIMARY)
-        let cb = ui_theme_b(UI_COLOR_PRIMARY)
-        let _sc = ui_tree_set_color(dot, cr, cg, cb)
+        let _sc = ui_tree_set_color_themed(dot, UI_COLOR_PRIMARY)
       else
-        let cr = ui_theme_r(UI_COLOR_BORDER)
-        let cg = ui_theme_g(UI_COLOR_BORDER)
-        let cb = ui_theme_b(UI_COLOR_BORDER)
-        let _sc = ui_tree_set_color(dot, cr, cg, cb)
+        let _sc = ui_tree_set_color_themed(dot, UI_COLOR_BORDER)
       end
     end
     i = i + 1.0

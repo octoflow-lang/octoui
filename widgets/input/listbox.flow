@@ -54,11 +54,8 @@ fn ui_listbox(parent, w, visible_rows)
   let h = visible_rows * UI_LISTBOX_ROW_H
   let container = ui_tree_add(UI_LISTBOX, parent, w, h, " ")
 
-  // Set border color background
-  let br = ui_theme_r(UI_COLOR_SURFACE)
-  let bg = ui_theme_g(UI_COLOR_SURFACE)
-  let bb = ui_theme_b(UI_COLOR_SURFACE)
-  let _sc = ui_tree_set_color(container, br, bg, bb)
+  // Set surface color background
+  let _sc = ui_tree_set_color_themed(container, UI_COLOR_SURFACE)
 
   // Register listbox
   let needed = container + 1.0
@@ -82,17 +79,11 @@ fn ui_listbox(parent, w, visible_rows)
   while ri < visible_rows
     // Background box (for selection highlight)
     let row_bg = ui_tree_add(UI_BOX, container, w, UI_LISTBOX_ROW_H, " ")
-    let sr = ui_theme_r(UI_COLOR_SURFACE)
-    let sg = ui_theme_g(UI_COLOR_SURFACE)
-    let sb = ui_theme_b(UI_COLOR_SURFACE)
-    let _rc = ui_tree_set_color(row_bg, sr, sg, sb)
+    let _rc = ui_tree_set_color_themed(row_bg, UI_COLOR_SURFACE)
 
     // Text label (overlaid on background)
     let row_txt = ui_tree_add(UI_TEXT, container, w, 16.0, " ")
-    let tr = ui_theme_r(UI_COLOR_TEXT)
-    let tg = ui_theme_g(UI_COLOR_TEXT)
-    let tb = ui_theme_b(UI_COLOR_TEXT)
-    let _tc = ui_tree_set_color(row_txt, tr, tg, tb)
+    let _tc = ui_tree_set_color_themed(row_txt, UI_COLOR_TEXT)
 
     push(_ui_lb_rows, row_txt)
     push(_ui_lb_row_owner, container)
@@ -237,15 +228,9 @@ fn ui_listbox_refresh(lb_id)
 
         // Highlight selected item
         if item_idx == selected
-          let hr = ui_theme_r(UI_COLOR_PRIMARY)
-          let hg = ui_theme_g(UI_COLOR_PRIMARY)
-          let hb = ui_theme_b(UI_COLOR_PRIMARY)
-          let _hc = ui_tree_set_color(row_bg_widget, hr, hg, hb)
+          let _hc = ui_tree_set_color_themed(row_bg_widget, UI_COLOR_PRIMARY)
         else
-          let sr = ui_theme_r(UI_COLOR_SURFACE)
-          let sg = ui_theme_g(UI_COLOR_SURFACE)
-          let sb = ui_theme_b(UI_COLOR_SURFACE)
-          let _sc = ui_tree_set_color(row_bg_widget, sr, sg, sb)
+          let _sc = ui_tree_set_color_themed(row_bg_widget, UI_COLOR_SURFACE)
         end
       else
         // No item for this row — hide it

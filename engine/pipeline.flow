@@ -16,6 +16,7 @@ use "dirty"
 use "font"
 use "../themes/dark"
 use "../widgets/core/tooltip"
+use "../widgets/core/notification"
 
 // VM state: [0]=vm_id [1]=screen_w [2]=screen_h [3]=initialized [4]=total_pixels
 let mut _ui_vm = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -63,6 +64,9 @@ fn ui_pipeline_init(w, h)
     push(_ui_fb_b, 0.0)
     pi = pi + 1.0
   end
+
+  // Set screen width for notification positioning
+  let _nsw = ui_notify_set_screen_w(w)
 
   print("OctoUI pipeline initialized: {w}x{h}")
   return 0.0
@@ -286,6 +290,70 @@ fn ui_pipeline_render()
         end
       end
       tt_ci = tt_ci + 1.0
+    end
+  end
+
+  // ── 3c. Notification overlay ──
+  if ui_notify_visible() == 1.0
+    let nt_text = ui_notify_text()
+    let nt_x = ui_notify_x()
+    let nt_y = ui_notify_y()
+    let nt_len = len(nt_text)
+    let nt_scale = 2.0
+    let nt_char_w = 5.0 * nt_scale
+    let nt_text_h = 6.0 * nt_scale
+    let nt_pad = 8.0
+    let nt_w = nt_len * nt_char_w + nt_pad * 2.0
+    let nt_h = nt_text_h + nt_pad * 2.0
+    let nt_cidx = ui_notify_color()
+
+    // Background rect (notification color)
+    _ui_pc_rect[0] = nt_x
+    _ui_pc_rect[1] = nt_y
+    _ui_pc_rect[2] = nt_w
+    _ui_pc_rect[3] = nt_h
+    _ui_pc_rect[4] = ui_theme_r(nt_cidx)
+    _ui_pc_rect[5] = ui_theme_g(nt_cidx)
+    _ui_pc_rect[6] = ui_theme_b(nt_cidx)
+    _ui_pc_rect[7] = w
+    _ui_pc_rect[8] = total
+    let nt_pixels = nt_w * nt_h
+    let nt_wg = floor((nt_pixels + 255.0) / 256.0)
+    let _dnt = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, nt_wg)
+
+    // Text (white for contrast on colored background)
+    let nt_tx = nt_x + nt_pad
+    let nt_ty = nt_y + nt_pad
+
+    let mut nt_ci = 0.0
+    while nt_ci < nt_len
+      let nt_ch = char_at(nt_text, nt_ci)
+      let nt_code = ord(nt_ch)
+      if nt_code > 32.0
+        let mut nt_glyph = nt_code - 32.0
+        if nt_code >= 97.0
+          if nt_code <= 122.0
+            nt_glyph = nt_code - 97.0 + 33.0
+          end
+        end
+        if nt_glyph >= 0.0
+          if nt_glyph < 64.0
+            _ui_pc_text[0] = nt_glyph * 6.0
+            _ui_pc_text[1] = nt_tx + nt_ci * nt_char_w
+            _ui_pc_text[2] = nt_ty
+            _ui_pc_text[3] = nt_scale
+            _ui_pc_text[4] = ui_theme_r(UI_COLOR_TEXT)
+            _ui_pc_text[5] = ui_theme_g(UI_COLOR_TEXT)
+            _ui_pc_text[6] = ui_theme_b(UI_COLOR_TEXT)
+            _ui_pc_text[7] = w
+            _ui_pc_text[8] = total
+            let nt_threads = 24.0 * nt_scale * nt_scale
+            let nt_twg = floor((nt_threads + 255.0) / 256.0)
+            let _dntg = vm_dispatch(vm, _ui_spv_text, _ui_pc_text, nt_twg)
+          end
+        end
+      end
+      nt_ci = nt_ci + 1.0
     end
   end
 

@@ -44,8 +44,12 @@
 - Listbox widget (selectable list with Up/Down keyboard navigation and scroll viewport)
 - Spinbox widget (numeric +/- with arrow key control)
 - Tooltip system (hover-delayed floating text popups, Z-ordered overlay)
+- Light theme (bright palette for all 8 semantic colors)
+- Runtime theme switching (ui_theme_load_light, ui_theme_load_dark, ui_theme_apply_all)
+- Semantic color tracking per widget (_ui_color_idx[], ui_tree_set_color_themed)
+- Notification toast system (queued pop-ups, auto-dismiss after 3 seconds)
 - 16 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Tests: 18/18 passing (12 tree + 6 kernel)

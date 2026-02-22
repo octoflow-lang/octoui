@@ -54,10 +54,7 @@ fn ui_spinbox(parent, w, h, min_val, max_val, step, initial)
   // Value display (center)
   let disp_w = w - btn_w * 2.0
   let display = ui_tree_add(UI_SPINBOX, row, disp_w, h, " ")
-  let sr = ui_theme_r(UI_COLOR_SURFACE)
-  let sg = ui_theme_g(UI_COLOR_SURFACE)
-  let sb = ui_theme_b(UI_COLOR_SURFACE)
-  let _sc = ui_tree_set_color(display, sr, sg, sb)
+  let _sc = ui_tree_set_color_themed(display, UI_COLOR_SURFACE)
 
   // [+] button
   let plus = ui_button(row, btn_w, h, "+")

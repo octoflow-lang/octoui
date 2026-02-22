@@ -101,10 +101,7 @@ fn ui_tab(tabs_id, label)
 
   // First tab button gets active color
   if count == 0.0
-    let cr = ui_theme_r(UI_COLOR_PRIMARY)
-    let cg = ui_theme_g(UI_COLOR_PRIMARY)
-    let cb = ui_theme_b(UI_COLOR_PRIMARY)
-    let _sc = ui_tree_set_color(btn, cr, cg, cb)
+    let _sc = ui_tree_set_color_themed(btn, UI_COLOR_PRIMARY)
   end
 
   // Track this tab
@@ -177,10 +174,7 @@ fn ui_tabs_set(tabs_id, index)
         _ui_visible[old_panel] = 0.0
         // Old tab button: surface color
         let old_btn = _ui_tab_btns[i]
-        let sr = ui_theme_r(UI_COLOR_SURFACE)
-        let sg = ui_theme_g(UI_COLOR_SURFACE)
-        let sb = ui_theme_b(UI_COLOR_SURFACE)
-        let _sc1 = ui_tree_set_color(old_btn, sr, sg, sb)
+        let _sc1 = ui_tree_set_color_themed(old_btn, UI_COLOR_SURFACE)
       end
       if tab_idx == index
         // Show new panel
@@ -188,10 +182,7 @@ fn ui_tabs_set(tabs_id, index)
         _ui_visible[new_panel] = 1.0
         // New tab button: primary color
         let new_btn = _ui_tab_btns[i]
-        let pr = ui_theme_r(UI_COLOR_PRIMARY)
-        let pg = ui_theme_g(UI_COLOR_PRIMARY)
-        let pb = ui_theme_b(UI_COLOR_PRIMARY)
-        let _sc2 = ui_tree_set_color(new_btn, pr, pg, pb)
+        let _sc2 = ui_tree_set_color_themed(new_btn, UI_COLOR_PRIMARY)
       end
       tab_idx = tab_idx + 1.0
     end

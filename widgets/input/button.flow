@@ -17,11 +17,8 @@ let mut _ui_btn_clicked = []
 // Returns: widget ID
 fn ui_button(parent, w, h, label)
   let id = ui_tree_add(UI_BUTTON, parent, w, h, label)
-  // Default color: surface
-  let cr = ui_theme_r(UI_COLOR_SURFACE)
-  let cg = ui_theme_g(UI_COLOR_SURFACE)
-  let cb = ui_theme_b(UI_COLOR_SURFACE)
-  let _s = ui_tree_set_color(id, cr, cg, cb)
+  // Default color: surface (themed for runtime switching)
+  let _s = ui_tree_set_color_themed(id, UI_COLOR_SURFACE)
   // Ensure click tracking array is big enough
   let needed = id + 1.0
   while len(_ui_btn_clicked) < needed
@@ -54,21 +51,15 @@ end
 // Called by input system when hover/press state changes
 fn ui_button_update_visual(id)
   let state = _ui_state[id]
-  let mut cr = ui_theme_r(UI_COLOR_SURFACE)
-  let mut cg = ui_theme_g(UI_COLOR_SURFACE)
-  let mut cb = ui_theme_b(UI_COLOR_SURFACE)
+  let mut color_idx = UI_COLOR_SURFACE
   if state == 1.0
     // Hovered
-    cr = ui_theme_r(UI_COLOR_HOVER)
-    cg = ui_theme_g(UI_COLOR_HOVER)
-    cb = ui_theme_b(UI_COLOR_HOVER)
+    color_idx = UI_COLOR_HOVER
   end
   if state == 2.0
     // Pressed
-    cr = ui_theme_r(UI_COLOR_ACTIVE)
-    cg = ui_theme_g(UI_COLOR_ACTIVE)
-    cb = ui_theme_b(UI_COLOR_ACTIVE)
+    color_idx = UI_COLOR_ACTIVE
   end
-  let _s = ui_tree_set_color(id, cr, cg, cb)
+  let _s = ui_tree_set_color_themed(id, color_idx)
   return 0.0
 end

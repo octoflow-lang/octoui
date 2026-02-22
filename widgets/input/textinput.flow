@@ -27,10 +27,7 @@ let mut _ui_ti_submitted = []
 // Returns: widget ID
 fn ui_textinput(parent, w, h)
   let id = ui_tree_add(UI_TEXTINPUT, parent, w, h, " ")
-  let cr = ui_theme_r(UI_COLOR_SURFACE)
-  let cg = ui_theme_g(UI_COLOR_SURFACE)
-  let cb = ui_theme_b(UI_COLOR_SURFACE)
-  let _s = ui_tree_set_color(id, cr, cg, cb)
+  let _s = ui_tree_set_color_themed(id, UI_COLOR_SURFACE)
 
   // Track value and cursor
   let needed = id + 1.0

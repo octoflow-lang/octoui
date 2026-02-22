@@ -25,17 +25,11 @@ fn ui_checkbox(parent, label)
 
   // Checkbox box (16x16)
   let box_id = ui_tree_add(UI_CHECKBOX, row, 16.0, 16.0, " ")
-  let br = ui_theme_r(UI_COLOR_BORDER)
-  let bg = ui_theme_g(UI_COLOR_BORDER)
-  let bb = ui_theme_b(UI_COLOR_BORDER)
-  let _bc = ui_tree_set_color(box_id, br, bg, bb)
+  let _bc = ui_tree_set_color_themed(box_id, UI_COLOR_BORDER)
 
   // Label text
   let lbl = ui_tree_add(UI_TEXT, row, len(label) * 10.0, 16.0, label)
-  let tr = ui_theme_r(UI_COLOR_TEXT)
-  let tg = ui_theme_g(UI_COLOR_TEXT)
-  let tb = ui_theme_b(UI_COLOR_TEXT)
-  let _tc = ui_tree_set_color(lbl, tr, tg, tb)
+  let _tc = ui_tree_set_color_themed(lbl, UI_COLOR_TEXT)
 
   // Track checked state
   let needed = box_id + 1.0
@@ -96,16 +90,10 @@ fn ui_checkbox_update_visual(box_id)
   let checked = _ui_chk_checked[box_id]
   if checked == 1.0
     // Checked: primary color fill
-    let cr = ui_theme_r(UI_COLOR_PRIMARY)
-    let cg = ui_theme_g(UI_COLOR_PRIMARY)
-    let cb = ui_theme_b(UI_COLOR_PRIMARY)
-    let _s = ui_tree_set_color(box_id, cr, cg, cb)
+    let _s = ui_tree_set_color_themed(box_id, UI_COLOR_PRIMARY)
   else
     // Unchecked: border color (empty box)
-    let cr = ui_theme_r(UI_COLOR_BORDER)
-    let cg = ui_theme_g(UI_COLOR_BORDER)
-    let cb = ui_theme_b(UI_COLOR_BORDER)
-    let _s = ui_tree_set_color(box_id, cr, cg, cb)
+    let _s = ui_tree_set_color_themed(box_id, UI_COLOR_BORDER)
   end
   return 0.0
 end

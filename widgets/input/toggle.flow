@@ -39,24 +39,15 @@ fn ui_toggle(parent, label)
 
   // Track (background bar)
   let track = ui_tree_add(UI_TOGGLE, row, UI_TOGGLE_W, UI_TOGGLE_H, " ")
-  let tr = ui_theme_r(UI_COLOR_BORDER)
-  let tg = ui_theme_g(UI_COLOR_BORDER)
-  let tb = ui_theme_b(UI_COLOR_BORDER)
-  let _tc = ui_tree_set_color(track, tr, tg, tb)
+  let _tc = ui_tree_set_color_themed(track, UI_COLOR_BORDER)
 
   // Knob (slides left/right)
   let knob = ui_tree_add(UI_BOX, track, UI_TOGGLE_KNOB_W, UI_TOGGLE_H, " ")
-  let kr = ui_theme_r(UI_COLOR_TEXT)
-  let kg = ui_theme_g(UI_COLOR_TEXT)
-  let kb = ui_theme_b(UI_COLOR_TEXT)
-  let _kc = ui_tree_set_color(knob, kr, kg, kb)
+  let _kc = ui_tree_set_color_themed(knob, UI_COLOR_TEXT)
 
   // Label text
   let txt = ui_tree_add(UI_TEXT, row, len(label) * 10.0, 16.0, label)
-  let lr = ui_theme_r(UI_COLOR_TEXT)
-  let lg = ui_theme_g(UI_COLOR_TEXT)
-  let lb = ui_theme_b(UI_COLOR_TEXT)
-  let _lc = ui_tree_set_color(txt, lr, lg, lb)
+  let _lc = ui_tree_set_color_themed(txt, UI_COLOR_TEXT)
 
   // Track state
   let needed = row + 1.0
@@ -125,17 +116,11 @@ fn ui_toggle_update_visual(row_id)
   let state = _ui_toggle_state[row_id]
 
   if state == 1.0
-    // ON: primary color track, knob on right
-    let pr = ui_theme_r(UI_COLOR_PRIMARY)
-    let pg = ui_theme_g(UI_COLOR_PRIMARY)
-    let pb = ui_theme_b(UI_COLOR_PRIMARY)
-    let _tc = ui_tree_set_color(track, pr, pg, pb)
+    // ON: primary color track
+    let _tc = ui_tree_set_color_themed(track, UI_COLOR_PRIMARY)
   else
-    // OFF: border color track, knob on left
-    let br = ui_theme_r(UI_COLOR_BORDER)
-    let bg = ui_theme_g(UI_COLOR_BORDER)
-    let bb = ui_theme_b(UI_COLOR_BORDER)
-    let _tc = ui_tree_set_color(track, br, bg, bb)
+    // OFF: border color track
+    let _tc = ui_tree_set_color_themed(track, UI_COLOR_BORDER)
   end
 
   return 0.0
