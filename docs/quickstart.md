@@ -47,6 +47,7 @@ use "octoui/themes/dark"
 use "octoui/widgets/core/text"
 use "octoui/widgets/layout/column"
 use "octoui/platform/desktop/window_win32"
+use "octoui/platform/desktop/input"
 
 let _w = ui_window_open(400.0, 200.0, "My App")
 
@@ -61,16 +62,18 @@ let _l = ui_layout_update()
 
 let mut running = 1.0
 while running == 1.0
+  let alive = ui_poll_events()
+  if alive == 0.0
+    running = 0.0
+  end
+
   if ui_is_dirty() == 1.0
     let _r = ui_pipeline_render()
     let _p = ui_pipeline_present()
     let _cd = ui_clear_dirty()
+  else
+    let _sl = sleep(16.0)
   end
-  let alive = ui_window_alive()
-  if alive == 0.0
-    running = 0.0
-  end
-  let _sl = sleep(16.0)
 end
 
 let _c = ui_window_close()
