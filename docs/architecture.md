@@ -144,11 +144,13 @@ octoui/
     dirty.flow       Frame-level dirty tracking
     font.flow        Bitmap font data (4x6, ASCII 32-95)
   widgets/
-    core/box.flow    Colored rectangle
-    core/text.flow   Text label
-    input/button.flow  Clickable button
-    layout/row.flow    Horizontal container
-    layout/column.flow Vertical container
+    core/box.flow       Colored rectangle
+    core/text.flow      Text label
+    core/separator.flow Horizontal line (2px)
+    core/progress.flow  Progress bar (track + fill)
+    input/button.flow   Clickable button
+    layout/row.flow     Horizontal container
+    layout/column.flow  Vertical container
   themes/
     dark.flow        Dark color theme
   state/
@@ -156,10 +158,12 @@ octoui/
   platform/
     desktop/
       window_win32.flow  Win32 window management
-      input.flow         Mouse input processing
+      input.flow         Mouse + keyboard input processing
   examples/
     hello.flow       Hello World
     counter.flow     Interactive counter (Phase 1 acceptance test)
+    dashboard.flow   Multi-panel layout demo
+    timer.flow       Countdown timer with progress bar
   tests/
     test_tree.flow      Widget tree tests
     test_kernels.flow   GPU kernel tests
