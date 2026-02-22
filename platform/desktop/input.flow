@@ -1,0 +1,125 @@
+// platform/desktop/input.flow — Input Event Processing
+//
+// Polls window events via window_poll(), performs hit testing,
+// updates widget hover/press/click states.
+//
+// Window API:
+//   window_poll() -> "none"|"close"|"key_down"|"key_up"|"mouse_move"|"mouse_down"|"mouse_up"|"resize"
+//   window_event_x() -> last event x coordinate
+//   window_event_y() -> last event y coordinate
+
+use "../../engine/tree"
+use "../../engine/dirty"
+use "../../widgets/input/button"
+
+// Mouse state: [0]=mouse_x [1]=mouse_y [2]=mouse_down [3]=prev_mouse_down
+let mut _ui_input = [0.0, 0.0, 0.0, 0.0]
+
+// Poll all pending window events and update mouse state
+// Returns 1.0 if window is still open, 0.0 if close requested
+fn ui_poll_events()
+  let mut alive = 1.0
+
+  // Save previous mouse-down state for click detection
+  _ui_input[3] = _ui_input[2]
+
+  // Drain the event queue
+  let mut evt = window_poll()
+  while evt != "none"
+    if evt == "mouse_move"
+      _ui_input[0] = window_event_x()
+      _ui_input[1] = window_event_y()
+    end
+    if evt == "mouse_down"
+      _ui_input[0] = window_event_x()
+      _ui_input[1] = window_event_y()
+      _ui_input[2] = 1.0
+    end
+    if evt == "mouse_up"
+      _ui_input[0] = window_event_x()
+      _ui_input[1] = window_event_y()
+      _ui_input[2] = 0.0
+    end
+    if evt == "close"
+      alive = 0.0
+    end
+    evt = window_poll()
+  end
+
+  return alive
+end
+
+// Process input: hit testing and widget state updates
+// Call after ui_poll_events() each frame
+fn ui_process_input()
+  let mx = _ui_input[0]
+  let my = _ui_input[1]
+  let mdown = _ui_input[2]
+  let prev_down = _ui_input[3]
+
+  // Detect click: was down last frame, now up
+  let mut clicked = 0.0
+  if prev_down == 1.0
+    if mdown == 0.0
+      clicked = 1.0
+    end
+  end
+
+  // Clear per-frame click states
+  let _c = ui_button_clear_clicks()
+
+  // Hit test all widgets
+  let n = ui_tree_count()
+  let mut i = 0.0
+  while i < n
+    if _ui_visible[i] == 1.0
+      let wtype = _ui_types[i]
+      // Only process interactive widgets (buttons)
+      if wtype == UI_BUTTON
+        let wx = _ui_x[i]
+        let wy = _ui_y[i]
+        let ww = _ui_w[i]
+        let wh = _ui_h[i]
+        let old_state = _ui_state[i]
+
+        // Point-in-rect hit test
+        let mut hit = 0.0
+        if mx >= wx
+          if mx < wx + ww
+            if my >= wy
+              if my < wy + wh
+                hit = 1.0
+              end
+            end
+          end
+        end
+
+        let mut new_state = 0.0
+        if hit == 1.0
+          if mdown == 1.0
+            new_state = 2.0
+          else
+            new_state = 1.0
+          end
+          // Click: mouse was down on this widget, now released
+          if clicked == 1.0
+            let needed = i + 1.0
+            while len(_ui_btn_clicked) < needed
+              push(_ui_btn_clicked, 0.0)
+            end
+            _ui_btn_clicked[i] = 1.0
+          end
+        end
+
+        // Update state if changed
+        if new_state != old_state
+          _ui_state[i] = new_state
+          let _v = ui_button_update_visual(i)
+          let _d = ui_mark_dirty()
+        end
+      end
+    end
+    i = i + 1.0
+  end
+  return 0.0
+end

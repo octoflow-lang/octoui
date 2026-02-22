@@ -1,0 +1,295 @@
+// engine/pipeline.flow — OctoUI GPU Render Pipeline
+//
+// Core rendering engine. Uses GPU VM dispatch chains to render UI frames:
+//   1. Clear framebuffer (ui_clear.spv)
+//   2. Draw rectangles per widget (ui_rect.spv)
+//   3. Draw text glyphs per character (ui_text.spv)
+//   4. Build single VkCommandBuffer (vm_build)
+//   5. Submit once (vm_execute)
+//   6. Download R/G/B channels (vm_read_globals)
+//   7. Present via window_draw
+//
+// All rendering happens on the GPU. CPU only stages dispatch parameters.
+
+use "tree"
+use "dirty"
+use "font"
+use "../themes/dark"
+
+// VM state: [0]=vm_id [1]=screen_w [2]=screen_h [3]=initialized [4]=total_pixels
+let mut _ui_vm = [0.0, 0.0, 0.0, 0.0, 0.0]
+
+// Framebuffer download arrays
+let mut _ui_fb_r = []
+let mut _ui_fb_g = []
+let mut _ui_fb_b = []
+
+// Push constant arrays (reused per dispatch to avoid allocation)
+let mut _ui_pc_clear = [0.0, 0.0, 0.0, 0.0]
+let mut _ui_pc_rect = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+let mut _ui_pc_text = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+// Kernel paths (relative to octoflow working directory)
+let _ui_spv_clear = "octoui/kernels/ui_clear.spv"
+let _ui_spv_rect = "octoui/kernels/ui_rect.spv"
+let _ui_spv_text = "octoui/kernels/ui_text.spv"
+
+// Initialize the render pipeline
+// w, h: framebuffer dimensions in pixels
+fn ui_pipeline_init(w, h)
+  // Initialize font data
+  let _fi = ui_font_init()
+
+  let total = w * h
+
+  // Boot GPU VM: 1 instance, 1 register (unused), globals = 3 channels
+  let vm = vm_boot(1.0, 1.0, total * 3.0)
+
+  _ui_vm[0] = vm
+  _ui_vm[1] = w
+  _ui_vm[2] = h
+  _ui_vm[3] = 1.0
+  _ui_vm[4] = total
+
+  // Upload font data to Heap (binding 4)
+  let _sh = vm_set_heap(vm, _ui_font)
+
+  // Pre-allocate framebuffer download arrays
+  let mut pi = 0.0
+  while pi < total
+    push(_ui_fb_r, 0.0)
+    push(_ui_fb_g, 0.0)
+    push(_ui_fb_b, 0.0)
+    pi = pi + 1.0
+  end
+
+  print("OctoUI pipeline initialized: {w}x{h}")
+  return 0.0
+end
+
+// Render a complete frame
+// Stages all dispatches, builds command buffer, executes on GPU
+fn ui_pipeline_render()
+  let vm = _ui_vm[0]
+  let w = _ui_vm[1]
+  let h = _ui_vm[2]
+  let total = _ui_vm[4]
+
+  // ── 1. Clear framebuffer ──
+  let bg_r = ui_theme_r(UI_COLOR_BG)
+  let bg_g = ui_theme_g(UI_COLOR_BG)
+  let bg_b = ui_theme_b(UI_COLOR_BG)
+
+  // Colors in 0-255 range, matching window_draw expectation
+  _ui_pc_clear[0] = bg_r
+  _ui_pc_clear[1] = bg_g
+  _ui_pc_clear[2] = bg_b
+  _ui_pc_clear[3] = total
+
+  let wg_clear = floor((total + 255.0) / 256.0)
+  let _dc = vm_dispatch(vm, _ui_spv_clear, _ui_pc_clear, wg_clear)
+
+  // ── 2. Draw widget rectangles ──
+  let n = ui_tree_count()
+  let mut i = 0.0
+  while i < n
+    if _ui_visible[i] == 1.0
+      let wtype = _ui_types[i]
+      // Draw background rect for BOX and BUTTON widgets
+      if wtype == UI_BOX
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
+      if wtype == UI_BUTTON
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
+    end
+    i = i + 1.0
+  end
+
+  // ── 3. Draw text ──
+  let mut j = 0.0
+  while j < n
+    if _ui_visible[j] == 1.0
+      let wtype = _ui_types[j]
+      // Draw text for TEXT and BUTTON widgets
+      if wtype == UI_TEXT
+        let _dt = ui_pipeline_dispatch_text(vm, j, w, total)
+      end
+      if wtype == UI_BUTTON
+        let _dt = ui_pipeline_dispatch_button_text(vm, j, w, total)
+      end
+    end
+    j = j + 1.0
+  end
+
+  // ── 4. Build single command buffer ──
+  let prog = vm_build(vm)
+
+  // ── 5. Execute on GPU (single vkQueueSubmit) ──
+  let _ex = vm_execute(prog)
+
+  // ── 6. Download framebuffer channels ──
+  // Must use `let` so eval_array_fn handles vm_read_globals (array-returning).
+  // GPU_ARRAYS stores by name; window_draw finds them via gpu_array_get.
+  let _ui_fb_r = vm_read_globals(vm, 0.0, total)
+  let _ui_fb_g = vm_read_globals(vm, total, total)
+  let _ui_fb_b = vm_read_globals(vm, total * 2.0, total)
+
+  return 0.0
+end
+
+// Present the rendered frame to the window
+fn ui_pipeline_present()
+  let _wd = window_draw(_ui_fb_r, _ui_fb_g, _ui_fb_b)
+  return 0.0
+end
+
+// Shut down the render pipeline
+fn ui_pipeline_shutdown()
+  let vm = _ui_vm[0]
+  let _s = vm_shutdown(vm)
+  _ui_vm[3] = 0.0
+  return 0.0
+end
+
+// ── Internal helpers ──
+
+// Dispatch a rect for widget at index i
+fn ui_pipeline_dispatch_rect(vm, idx, screen_w, total)
+  let x0 = _ui_x[idx]
+  let y0 = _ui_y[idx]
+  let rw = _ui_w[idx]
+  let rh = _ui_h[idx]
+  let cr = _ui_colors_r[idx]
+  let cg = _ui_colors_g[idx]
+  let cb = _ui_colors_b[idx]
+
+  _ui_pc_rect[0] = x0
+  _ui_pc_rect[1] = y0
+  _ui_pc_rect[2] = rw
+  _ui_pc_rect[3] = rh
+  _ui_pc_rect[4] = cr
+  _ui_pc_rect[5] = cg
+  _ui_pc_rect[6] = cb
+  _ui_pc_rect[7] = screen_w
+  _ui_pc_rect[8] = total
+
+  let pixels = rw * rh
+  let wg = floor((pixels + 255.0) / 256.0)
+  let _d = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, wg)
+  return 0.0
+end
+
+// Dispatch text glyphs for a TEXT widget
+fn ui_pipeline_dispatch_text(vm, idx, screen_w, total)
+  let text = _ui_texts[idx]
+  let tx = _ui_x[idx]
+  let ty = _ui_y[idx]
+  let cr = _ui_colors_r[idx]
+  let cg = _ui_colors_g[idx]
+  let cb = _ui_colors_b[idx]
+  let scale = 2.0
+  let char_w = 5.0 * scale
+
+  let tlen = len(text)
+  let mut ci = 0.0
+  while ci < tlen
+    let ch = char_at(text, ci)
+    let ch_code = ord(ch)
+
+    // Map character to glyph index
+    let mut glyph_idx = ch_code - 32.0
+    // Map lowercase to uppercase
+    if ch_code >= 97.0
+      if ch_code <= 122.0
+        glyph_idx = ch_code - 97.0 + 33.0
+      end
+    end
+
+    // Skip if out of font range
+    if glyph_idx >= 0.0
+      if glyph_idx < 64.0
+        let dx = tx + ci * char_w
+        let dy = ty + 2.0
+
+        // Kernel expects font atlas offset: glyph_num * 6 (6 rows per glyph)
+        _ui_pc_text[0] = glyph_idx * 6.0
+        _ui_pc_text[1] = dx
+        _ui_pc_text[2] = dy
+        _ui_pc_text[3] = scale
+        _ui_pc_text[4] = cr
+        _ui_pc_text[5] = cg
+        _ui_pc_text[6] = cb
+        _ui_pc_text[7] = screen_w
+        _ui_pc_text[8] = total
+
+        // Threads = 4*scale * 6*scale = 24 * scale * scale
+        let threads = 24.0 * scale * scale
+        let wg = floor((threads + 255.0) / 256.0)
+        let _d = vm_dispatch(vm, _ui_spv_text, _ui_pc_text, wg)
+      end
+    end
+    ci = ci + 1.0
+  end
+  return 0.0
+end
+
+// Dispatch text for a BUTTON widget (centered in button rect)
+fn ui_pipeline_dispatch_button_text(vm, idx, screen_w, total)
+  let text = _ui_texts[idx]
+  let bx = _ui_x[idx]
+  let by = _ui_y[idx]
+  let bw = _ui_w[idx]
+  let bh = _ui_h[idx]
+  let scale = 2.0
+  let char_w = 5.0 * scale
+  let text_h = 6.0 * scale
+
+  // Center text in button
+  let tlen = len(text)
+  let text_w = tlen * char_w
+  let tx = bx + floor((bw - text_w) / 2.0)
+  let ty = by + floor((bh - text_h) / 2.0)
+
+  // Use theme text color for button label
+  let cr = ui_theme_r(UI_COLOR_TEXT)
+  let cg = ui_theme_g(UI_COLOR_TEXT)
+  let cb = ui_theme_b(UI_COLOR_TEXT)
+
+  let mut ci = 0.0
+  while ci < tlen
+    let ch = char_at(text, ci)
+    let ch_code = ord(ch)
+
+    let mut glyph_idx = ch_code - 32.0
+    if ch_code >= 97.0
+      if ch_code <= 122.0
+        glyph_idx = ch_code - 97.0 + 33.0
+      end
+    end
+
+    if glyph_idx >= 0.0
+      if glyph_idx < 64.0
+        let dx = tx + ci * char_w
+        let dy = ty
+
+        // Kernel expects font atlas offset: glyph_num * 6 (6 rows per glyph)
+        _ui_pc_text[0] = glyph_idx * 6.0
+        _ui_pc_text[1] = dx
+        _ui_pc_text[2] = dy
+        _ui_pc_text[3] = scale
+        _ui_pc_text[4] = cr
+        _ui_pc_text[5] = cg
+        _ui_pc_text[6] = cb
+        _ui_pc_text[7] = screen_w
+        _ui_pc_text[8] = total
+
+        let threads = 24.0 * scale * scale
+        let wg = floor((threads + 255.0) / 256.0)
+        let _d = vm_dispatch(vm, _ui_spv_text, _ui_pc_text, wg)
+      end
+    end
+    ci = ci + 1.0
+  end
+  return 0.0
+end

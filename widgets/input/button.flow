@@ -1,0 +1,74 @@
+// widgets/input/button.flow — Clickable Button Widget
+//
+// Button with hover/press visual states and click detection.
+// State tracking: _ui_state[id] = 0 (normal), 1 (hovered), 2 (pressed)
+
+use "../../engine/tree"
+use "../../themes/dark"
+use "../../engine/dirty"
+
+// Per-frame click tracking
+let mut _ui_btn_clicked = []
+
+// Create a button widget
+// parent: parent widget ID (-1 for root)
+// w, h: dimensions
+// label: button text
+// Returns: widget ID
+fn ui_button(parent, w, h, label)
+  let id = ui_tree_add(UI_BUTTON, parent, w, h, label)
+  // Default color: surface
+  let cr = ui_theme_r(UI_COLOR_SURFACE)
+  let cg = ui_theme_g(UI_COLOR_SURFACE)
+  let cb = ui_theme_b(UI_COLOR_SURFACE)
+  let _s = ui_tree_set_color(id, cr, cg, cb)
+  // Ensure click tracking array is big enough
+  let needed = id + 1.0
+  while len(_ui_btn_clicked) < needed
+    push(_ui_btn_clicked, 0.0)
+  end
+  return id
+end
+
+// Check if button was clicked this frame
+// Returns 1.0 if clicked, 0.0 otherwise
+fn ui_button_clicked(id)
+  if id < len(_ui_btn_clicked)
+    return _ui_btn_clicked[id]
+  end
+  return 0.0
+end
+
+// Clear all click states (called at start of each frame)
+fn ui_button_clear_clicks()
+  let n = len(_ui_btn_clicked)
+  let mut i = 0.0
+  while i < n
+    _ui_btn_clicked[i] = 0.0
+    i = i + 1.0
+  end
+  return 0.0
+end
+
+// Update button visual based on state
+// Called by input system when hover/press state changes
+fn ui_button_update_visual(id)
+  let state = _ui_state[id]
+  let mut cr = ui_theme_r(UI_COLOR_SURFACE)
+  let mut cg = ui_theme_g(UI_COLOR_SURFACE)
+  let mut cb = ui_theme_b(UI_COLOR_SURFACE)
+  if state == 1.0
+    // Hovered
+    cr = ui_theme_r(UI_COLOR_HOVER)
+    cg = ui_theme_g(UI_COLOR_HOVER)
+    cb = ui_theme_b(UI_COLOR_HOVER)
+  end
+  if state == 2.0
+    // Pressed
+    cr = ui_theme_r(UI_COLOR_ACTIVE)
+    cg = ui_theme_g(UI_COLOR_ACTIVE)
+    cb = ui_theme_b(UI_COLOR_ACTIVE)
+  end
+  let _s = ui_tree_set_color(id, cr, cg, cb)
+  return 0.0
+end

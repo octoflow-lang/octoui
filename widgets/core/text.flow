@@ -1,0 +1,27 @@
+// widgets/core/text.flow — Text Label Widget
+//
+// Displays text using bitmap font. Auto-sizes width based on content.
+// Each character is 4px wide + 1px gap at scale 2 = 10px per char.
+
+use "../../engine/tree"
+use "../../themes/dark"
+
+// Create a text label
+// parent: parent widget ID (-1 for root)
+// content: text string to display
+// color_idx: theme color index for text color
+// Returns: widget ID
+fn ui_text(parent, content, color_idx)
+  // Auto-compute width: 5px per char at scale 1, scale 2 = 10px per char
+  // Height: 6 rows * scale 2 = 12px + some padding
+  let scale = 2.0
+  let char_w = 5.0 * scale
+  let text_w = len(content) * char_w
+  let text_h = 6.0 * scale + 4.0
+  let id = ui_tree_add(UI_TEXT, parent, text_w, text_h, content)
+  let cr = ui_theme_r(color_idx)
+  let cg = ui_theme_g(color_idx)
+  let cb = ui_theme_b(color_idx)
+  let _s = ui_tree_set_color(id, cr, cg, cb)
+  return id
+end
