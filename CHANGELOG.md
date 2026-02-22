@@ -66,8 +66,11 @@
 - Disabled widgets blend 60% toward background color (rect) and use TEXT_DIM (text)
 - Tab navigation skips disabled widgets
 - Focus border hidden for disabled widgets
+- Collapsible section widget (accordion — clickable header with expand/collapse content)
+- Programmatic section expand/collapse (ui_section_expand, ui_section_collapse)
 - 19 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
+- Composite widgets: dropdown, tabs, spinbox, modal, progress, label, separator, tooltip, notification, section (all built from primitives)
 - Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Tests: 18/18 passing (12 tree + 6 kernel)

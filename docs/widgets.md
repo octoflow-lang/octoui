@@ -559,6 +559,35 @@ let _s = ui_scroll_to(panel, 0.0)    // scroll to top
 
 **Clipping:** Children partially visible at the viewport boundary are CPU-clipped — their rendered rect is trimmed so they don't overflow the scroll container.
 
+### Section — `widgets/layout/section.flow`
+
+A collapsible section (accordion) with a clickable header. Click the header button to expand/collapse the content body. The header shows "V TITLE" when expanded or "> TITLE" when collapsed.
+
+```
+use "octoui/widgets/layout/section"
+
+let body = ui_section(parent, "SETTINGS")
+// Add child widgets to the body:
+let _chk = ui_checkbox(body, "OPTION A")
+let _sld = ui_slider(body, 200.0, 16.0, 0.0, 100.0, 50.0)
+
+// In event loop — processes header clicks:
+let _sp = ui_section_process()
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `title` — Section header text
+
+**Returns:** Body column ID — add child widgets to this container.
+
+**API:**
+- `ui_section(parent, title)` — Create section, returns body column ID
+- `ui_section_process()` — Process header clicks (call each frame)
+- `ui_section_is_expanded(body_id)` — Check if expanded
+- `ui_section_expand(body_id)` — Programmatically expand
+- `ui_section_collapse(body_id)` — Programmatically collapse
+
 ## Overlay Widgets
 
 ### Modal — `widgets/core/modal.flow`
