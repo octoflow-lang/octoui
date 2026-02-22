@@ -547,10 +547,15 @@ let _s = ui_scroll_to(panel, 0.0)    // scroll to top
 - `ui_scroll_get_offset(container)` — Get current scroll offset
 - `ui_scroll_content_height(container)` — Get total content height
 - `ui_scroll_can_scroll(container)` — Check if content overflows viewport
+- `ui_scroll_process_mouse(mx, my, mdown, clicked)` — Process scrollbar drag + track click
 
 **Keyboard:** Up/Down arrows scroll by 20px. PageUp/PageDown scroll by viewport height. Home/End scroll to top/bottom.
 
+**Mouse:** Drag the scrollbar thumb to scroll smoothly. Click on the scrollbar track to jump to that position.
+
 **Scrollbar:** A track+thumb appears on the right edge when content overflows. Thumb size reflects the viewport/content ratio.
+
+**Clipping:** Children partially visible at the viewport boundary are CPU-clipped — their rendered rect is trimmed so they don't overflow the scroll container.
 
 ## Overlay Widgets
 

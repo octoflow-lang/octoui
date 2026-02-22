@@ -149,7 +149,8 @@ while running == 1.0
 
   let key = ui_key_down()
 
-  // Process scroll keyboard input
+  // Process scroll mouse + keyboard input
+  let _sm = ui_scroll_process_mouse(ui_mouse_x(), ui_mouse_y(), ui_mouse_down(), ui_mouse_clicked())
   let _sk = ui_scroll_process(key)
 
   // Process modal close button

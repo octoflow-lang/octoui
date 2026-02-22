@@ -53,6 +53,8 @@
 - Ancestor traversal helper (ui_tree_is_descendant, up to 4 levels)
 - Scroll container widget (vertical scrolling, visibility clipping, scrollbar track+thumb)
 - Keyboard scroll navigation (Up/Down/PageUp/PageDown/Home/End)
+- Scrollbar mouse interaction (thumb drag + track click-to-page)
+- CPU viewport clipping (partial children clipped at scroll container boundary)
 - 17 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
 - Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog

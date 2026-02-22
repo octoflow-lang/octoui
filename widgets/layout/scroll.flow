@@ -37,6 +37,12 @@ let mut _ui_scroll_spacing = []    // spacing between children
 let mut _ui_scroll_bar = []        // scrollbar track widget ID
 let mut _ui_scroll_thumb = []      // scrollbar thumb widget ID
 
+// Mouse drag state: [0]=active_scroll_idx (-1=none), [1]=drag_start_my, [2]=drag_start_offset
+let mut _ui_scroll_drag = [-1.0, 0.0, 0.0]
+
+// Original heights for clipped children (indexed by widget ID)
+let mut _ui_scroll_orig_h = []
+
 // Create a scroll container
 // parent: parent widget ID (-1.0 for root)
 // w: viewport width
@@ -154,15 +160,34 @@ fn ui_scroll_update_all()
           is_scrollbar = 1.0
         end
         if is_scrollbar == 0.0
+          // Ensure orig_h tracking array is large enough
+          let needed_oh = wi + 1.0
+          while len(_ui_scroll_orig_h) < needed_oh
+            push(_ui_scroll_orig_h, 0.0)
+          end
+
+          // Restore original height if previously clipped
+          if _ui_scroll_orig_h[wi] > 0.0
+            _ui_h[wi] = _ui_scroll_orig_h[wi]
+          end
+
+          let orig_h = _ui_h[wi]
+          _ui_scroll_orig_h[wi] = orig_h
+
+          // Accumulate content height (before clipping)
+          content_h = content_h + orig_h
+          child_count = child_count + 1.0
+
           // Position child
           _ui_x[wi] = cx
           _ui_y[wi] = cur_y
 
-          // Visibility: hide if fully outside viewport
-          let child_bottom = cur_y + _ui_h[wi]
+          // Viewport bounds
+          let child_bottom = cur_y + orig_h
           let view_top = cy
           let view_bottom = cy + ch
 
+          // Visibility: hide if fully outside viewport
           let mut vis = 1.0
           if child_bottom <= view_top
             vis = 0.0
@@ -170,13 +195,30 @@ fn ui_scroll_update_all()
           if cur_y >= view_bottom
             vis = 0.0
           end
+
+          // CPU clipping: adjust y and h for partially visible children
+          if vis == 1.0
+            // Clip top edge
+            if cur_y < view_top
+              let clip_top = view_top - cur_y
+              _ui_y[wi] = view_top
+              _ui_h[wi] = orig_h - clip_top
+            end
+            // Clip bottom edge
+            if child_bottom > view_bottom
+              let clip_bottom = child_bottom - view_bottom
+              _ui_h[wi] = _ui_h[wi] - clip_bottom
+            end
+            // If clipped to zero or negative, hide
+            if _ui_h[wi] <= 0.0
+              vis = 0.0
+              _ui_h[wi] = orig_h
+            end
+          end
+
           _ui_visible[wi] = vis
 
-          // Accumulate content height
-          content_h = content_h + _ui_h[wi]
-          child_count = child_count + 1.0
-
-          cur_y = cur_y + _ui_h[wi] + spacing
+          cur_y = cur_y + orig_h + spacing
         end
       end
       wi = wi + 1.0
@@ -225,6 +267,93 @@ fn ui_scroll_update_all()
 
     si = si + 1.0
   end
+  return 0.0
+end
+
+// Process mouse interaction with scrollbar (drag thumb + click track)
+// mx, my: mouse position
+// mdown: mouse button state (1.0 = down)
+// clicked: 1.0 if mouse was just pressed this frame
+fn ui_scroll_process_mouse(mx, my, mdown, clicked)
+  // Continue active drag
+  if _ui_scroll_drag[0] >= 0.0
+    if mdown == 1.0
+      // Dragging: compute scroll from mouse Y delta
+      let si = _ui_scroll_drag[0]
+      let container = _ui_scroll_ids[si]
+      let cy = _ui_y[container]
+      let ch = _ui_h[container]
+      let content_h = _ui_scroll_content_h[si]
+      let max_scroll = content_h - ch
+
+      if max_scroll > 0.0
+        let ratio = ch / content_h
+        let mut thumb_h = floor(ch * ratio)
+        if thumb_h < UI_SCROLL_MIN_THUMB
+          thumb_h = UI_SCROLL_MIN_THUMB
+        end
+        let thumb_range = ch - thumb_h
+
+        if thumb_range > 0.0
+          // Convert mouse delta to scroll delta
+          let drag_start_y = _ui_scroll_drag[1]
+          let drag_start_off = _ui_scroll_drag[2]
+          let mouse_delta = my - drag_start_y
+          let scroll_per_pixel = max_scroll / thumb_range
+          let new_offset = drag_start_off + mouse_delta * scroll_per_pixel
+          let _s = ui_scroll_set_offset(si, new_offset)
+          let _u = ui_scroll_update_all()
+        end
+      end
+      return 0.0
+    else
+      // Mouse released: end drag
+      _ui_scroll_drag[0] = -1.0
+      return 0.0
+    end
+  end
+
+  // Check for new click on scrollbar
+  if clicked == 1.0
+    let n = len(_ui_scroll_ids)
+    let mut si = 0.0
+    while si < n
+      let container = _ui_scroll_ids[si]
+      let content_h = _ui_scroll_content_h[si]
+      let ch = _ui_h[container]
+
+      // Only if content overflows (scrollbar visible)
+      if content_h > ch
+        let bar_id = _ui_scroll_bar[si]
+        let thumb_id = _ui_scroll_thumb[si]
+
+        // Check thumb hit (drag start)
+        let thumb_hit = ui_hit_test(mx, my, _ui_x[thumb_id], _ui_y[thumb_id], _ui_w[thumb_id], _ui_h[thumb_id])
+        if thumb_hit == 1.0
+          _ui_scroll_drag[0] = si
+          _ui_scroll_drag[1] = my
+          _ui_scroll_drag[2] = _ui_scroll_offset[si]
+          return 0.0
+        end
+
+        // Check track hit (page jump)
+        let track_hit = ui_hit_test(mx, my, _ui_x[bar_id], _ui_y[bar_id], _ui_w[bar_id], _ui_h[bar_id])
+        if track_hit == 1.0
+          // Compute scroll position from click location on track
+          let cy = _ui_y[container]
+          let max_scroll = content_h - ch
+          let track_pos = my - cy
+          let track_ratio = track_pos / ch
+          let target_offset = track_ratio * max_scroll
+          let _s = ui_scroll_set_offset(si, target_offset)
+          let _u = ui_scroll_update_all()
+          return 0.0
+        end
+      end
+      si = si + 1.0
+    end
+  end
+
   return 0.0
 end
 
