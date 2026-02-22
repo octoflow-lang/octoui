@@ -17,6 +17,8 @@ use "font"
 use "../themes/dark"
 use "../widgets/core/tooltip"
 use "../widgets/core/notification"
+use "../widgets/core/modal"
+use "../widgets/layout/scroll"
 
 // VM state: [0]=vm_id [1]=screen_w [2]=screen_h [3]=initialized [4]=total_pixels
 let mut _ui_vm = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -65,8 +67,9 @@ fn ui_pipeline_init(w, h)
     pi = pi + 1.0
   end
 
-  // Set screen width for notification positioning
+  // Set screen dimensions for notification and modal positioning
   let _nsw = ui_notify_set_screen_w(w)
+  let _mss = ui_modal_set_screen(w, h)
 
   print("OctoUI pipeline initialized: {w}x{h}")
   return 0.0
@@ -126,6 +129,9 @@ fn ui_pipeline_render()
         if ftype == UI_SPINBOX
           draw_border = 1.0
         end
+        if ftype == UI_SCROLL
+          draw_border = 1.0
+        end
         if draw_border == 1.0
           let bpad = 2.0
           _ui_pc_rect[0] = _ui_x[fi] - bpad
@@ -177,6 +183,9 @@ fn ui_pipeline_render()
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
       if wtype == UI_SPINBOX
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
+      if wtype == UI_SCROLL
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
     end
@@ -354,6 +363,91 @@ fn ui_pipeline_render()
         end
       end
       nt_ci = nt_ci + 1.0
+    end
+  end
+
+  // ── 3d. Modal overlay (dim background + re-render modal widgets on top) ──
+  let modal_cid = ui_modal_container()
+  if modal_cid >= 0.0
+    // Dim overlay: dark rect covering entire screen
+    _ui_pc_rect[0] = 0.0
+    _ui_pc_rect[1] = 0.0
+    _ui_pc_rect[2] = w
+    _ui_pc_rect[3] = h
+    let dim_r = floor(ui_theme_r(UI_COLOR_BG) / 2.0)
+    let dim_g = floor(ui_theme_g(UI_COLOR_BG) / 2.0)
+    let dim_b = floor(ui_theme_b(UI_COLOR_BG) / 2.0)
+    _ui_pc_rect[4] = dim_r
+    _ui_pc_rect[5] = dim_g
+    _ui_pc_rect[6] = dim_b
+    _ui_pc_rect[7] = w
+    _ui_pc_rect[8] = total
+    let dim_wg = floor((total + 255.0) / 256.0)
+    let _ddim = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, dim_wg)
+
+    // Re-render modal widget rects
+    let mn = ui_tree_count()
+    let mut mi = 0.0
+    while mi < mn
+      if _ui_visible[mi] == 1.0
+        if ui_tree_is_descendant(mi, modal_cid) == 1.0
+          let mwtype = _ui_types[mi]
+          let mut mdraw = 0.0
+          if mwtype == UI_BOX
+            mdraw = 1.0
+          end
+          if mwtype == UI_BUTTON
+            mdraw = 1.0
+          end
+          if mwtype == UI_CHECKBOX
+            mdraw = 1.0
+          end
+          if mwtype == UI_TEXTINPUT
+            mdraw = 1.0
+          end
+          if mwtype == UI_SLIDER
+            mdraw = 1.0
+          end
+          if mwtype == UI_RADIO
+            mdraw = 1.0
+          end
+          if mwtype == UI_TOGGLE
+            mdraw = 1.0
+          end
+          if mwtype == UI_COLUMN
+            // Draw column if it has a color (like the panel)
+            if _ui_color_idx[mi] >= 0.0
+              mdraw = 1.0
+            end
+          end
+          if mwtype == UI_ROW
+            if _ui_color_idx[mi] >= 0.0
+              mdraw = 1.0
+            end
+          end
+          if mdraw == 1.0
+            let _mdr = ui_pipeline_dispatch_rect(vm, mi, w, total)
+          end
+        end
+      end
+      mi = mi + 1.0
+    end
+
+    // Re-render modal widget text
+    let mut mj = 0.0
+    while mj < mn
+      if _ui_visible[mj] == 1.0
+        if ui_tree_is_descendant(mj, modal_cid) == 1.0
+          let mwtype2 = _ui_types[mj]
+          if mwtype2 == UI_TEXT
+            let _mdt = ui_pipeline_dispatch_text(vm, mj, w, total)
+          end
+          if mwtype2 == UI_BUTTON
+            let _mdt2 = ui_pipeline_dispatch_button_text(vm, mj, w, total)
+          end
+        end
+      end
+      mj = mj + 1.0
     end
   end
 

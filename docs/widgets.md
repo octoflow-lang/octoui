@@ -17,6 +17,7 @@
 | UI_TAB | 11.0 | Tab button |
 | UI_LISTBOX | 12.0 | Selectable list |
 | UI_SPINBOX | 13.0 | Numeric up/down |
+| UI_SCROLL | 14.0 | Scroll container |
 
 ## Core Widgets
 
@@ -506,6 +507,97 @@ use "octoui/widgets/layout/row"
 let row = ui_row(parent, 20.0)  // 20px spacing between children
 ```
 
+### Scroll — `widgets/layout/scroll.flow`
+
+A vertically-scrolling container that clips children to a fixed viewport. Shows a scrollbar when content overflows.
+
+```
+use "octoui/widgets/layout/scroll"
+
+let panel = ui_scroll(parent, 300.0, 200.0, 8.0)
+//                            width  height spacing
+
+// Add any widgets as children:
+let _b1 = ui_box(panel, 280.0, 60.0, UI_COLOR_SURFACE)
+let _b2 = ui_box(panel, 280.0, 60.0, UI_COLOR_PRIMARY)
+
+// After layout:
+let _su = ui_scroll_update_all()
+
+// In event loop:
+let _sk = ui_scroll_process(key)  // keyboard scrolling
+
+// Programmatic scroll:
+let _s = ui_scroll_by(panel, 20.0)   // scroll down 20px
+let _s = ui_scroll_to(panel, 0.0)    // scroll to top
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Viewport width
+- `h` — Viewport height
+- `spacing` — Vertical spacing between children
+
+**Functions:**
+- `ui_scroll(parent, w, h, spacing)` — Create scroll container
+- `ui_scroll_by(container, delta)` — Scroll by delta pixels (positive=down)
+- `ui_scroll_to(container, offset)` — Scroll to absolute offset
+- `ui_scroll_update_all()` — Position children and update scrollbar (call after layout)
+- `ui_scroll_process(key)` — Process keyboard input for scroll navigation
+- `ui_scroll_get_offset(container)` — Get current scroll offset
+- `ui_scroll_content_height(container)` — Get total content height
+- `ui_scroll_can_scroll(container)` — Check if content overflows viewport
+
+**Keyboard:** Up/Down arrows scroll by 20px. PageUp/PageDown scroll by viewport height. Home/End scroll to top/bottom.
+
+**Scrollbar:** A track+thumb appears on the right edge when content overflows. Thumb size reflects the viewport/content ratio.
+
+## Overlay Widgets
+
+### Modal — `widgets/core/modal.flow`
+
+Overlay dialog with title bar and close button. Only one modal can be open at a time. Background widgets are dimmed and input-blocked.
+
+```
+use "octoui/widgets/core/modal"
+
+// Create modal (initially hidden)
+let dlg = ui_modal(300.0, 200.0, "CONFIRM")
+let panel = ui_modal_panel(dlg)
+
+// Add widgets to modal panel:
+let msg = ui_text(panel, "ARE YOU SURE?", UI_COLOR_TEXT)
+let ok_btn = ui_button(panel, 100.0, 28.0, "OK")
+
+// Open the modal:
+let _o = ui_modal_open(dlg)
+
+// In event loop:
+let _mp = ui_modal_process()  // handles close button
+
+// Check if closed:
+if ui_modal_is_open(dlg) == 0.0
+  // Modal was dismissed
+end
+```
+
+**Parameters:**
+- `w` — Dialog width
+- `h` — Dialog height
+- `title` — Title bar text
+
+**Functions:**
+- `ui_modal(w, h, title)` — Create modal, returns modal ID
+- `ui_modal_panel(modal_id)` — Get content panel for adding widgets
+- `ui_modal_open(modal_id)` — Show the modal (centered on screen)
+- `ui_modal_close(modal_id)` — Hide the modal
+- `ui_modal_is_open(modal_id)` — Check if modal is open
+- `ui_modal_active()` — Get active modal ID (-1 if none)
+- `ui_modal_process()` — Process close button clicks (call each frame)
+- `ui_modal_container()` — Get modal container widget ID (for pipeline)
+
+**Behavior:** When a modal is open, ESC closes it. All input to background widgets is blocked. The background is dimmed to half brightness. The modal renders on top of everything via the overlay pipeline pass.
+
 ## Theme Colors
 
 Defined in `themes/dark.flow` and `themes/light.flow`:
@@ -582,7 +674,7 @@ let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox, Scroll.
 
 **Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
 
@@ -629,6 +721,10 @@ let key = ui_key_down()  // Get last key name (" " if none)
 | Escape | Dropdown | Close open dropdown |
 | Up/Down | Listbox | Navigate items (auto-scrolls viewport) |
 | Up/Down | Spinbox | Increment/decrement value by step |
+| Up/Down | Scroll | Scroll by 20px |
+| PageUp/Down | Scroll | Scroll by viewport height |
+| Home/End | Scroll | Scroll to top/bottom |
+| Escape | Modal | Close active modal dialog |
 
 ## Tree Operations
 
@@ -646,6 +742,7 @@ ui_tree_set_padding(id, padding)      // Set container padding
 ui_tree_count()                        // Total widget count
 ui_tree_is_container(id)              // Check if ROW or COLUMN
 ui_tree_set_visible(id, flag)         // Show (1.0) or hide (0.0) widget
+ui_tree_is_descendant(widget, ancestor) // Check parent chain (up to 4 levels)
 ```
 
 **Visibility:** Hidden widgets are skipped in rendering, layout sizing, layout positioning, and Tab navigation. Use `ui_tree_set_visible(id, 0.0)` to hide, `ui_tree_set_visible(id, 1.0)` to show.

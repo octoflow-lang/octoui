@@ -48,8 +48,13 @@
 - Runtime theme switching (ui_theme_load_light, ui_theme_load_dark, ui_theme_apply_all)
 - Semantic color tracking per widget (_ui_color_idx[], ui_tree_set_color_themed)
 - Notification toast system (queued pop-ups, auto-dismiss after 3 seconds)
-- 16 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip
-- Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes
+- Modal dialog widget (overlay with title bar, close button, dim background, ESC dismiss)
+- Modal input blocking (only modal descendants receive input when modal is open)
+- Ancestor traversal helper (ui_tree_is_descendant, up to 4 levels)
+- Scroll container widget (vertical scrolling, visibility clipping, scrollbar track+thumb)
+- Keyboard scroll navigation (Up/Down/PageUp/PageDown/Home/End)
+- 17 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll
+- Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Tests: 18/18 passing (12 tree + 6 kernel)

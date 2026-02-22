@@ -19,6 +19,8 @@ use "../../widgets/input/toggle"
 use "../../widgets/input/listbox"
 use "../../widgets/input/tabs"
 use "../../widgets/input/spinbox"
+use "../../widgets/core/modal"
+use "../../widgets/layout/scroll"
 
 // Mouse state: [0]=mouse_x [1]=mouse_y [2]=mouse_down [3]=prev_mouse_down
 let mut _ui_input = [0.0, 0.0, 0.0, 0.0]
@@ -109,126 +111,155 @@ fn ui_process_input()
   // Track if any widget was clicked (for focus management)
   let mut clicked_widget = -1.0
 
+  // Modal input: ESC closes active modal
+  let modal_cid = ui_modal_container()
+  if modal_cid >= 0.0
+    if _ui_key_down == "escape"
+      let _mc = ui_modal_close(ui_modal_active())
+      return 0.0
+    end
+  end
+
   // Hit test all widgets
   let n = ui_tree_count()
   let mut i = 0.0
   while i < n
     if _ui_visible[i] == 1.0
-      let wtype = _ui_types[i]
+      // If modal is active, only process widgets inside the modal
+      let mut process_widget = 1.0
+      if modal_cid >= 0.0
+        if ui_tree_is_descendant(i, modal_cid) == 0.0
+          process_widget = 0.0
+        end
+      end
+      if process_widget == 1.0
+        let wtype = _ui_types[i]
 
-      // ── Buttons ──
-      if wtype == UI_BUTTON
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
-        let old_state = _ui_state[i]
+        // ── Buttons ──
+        if wtype == UI_BUTTON
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+          let old_state = _ui_state[i]
 
-        let mut new_state = 0.0
-        if hit == 1.0
-          if mdown == 1.0
-            new_state = 2.0
-          else
-            new_state = 1.0
-          end
-          if clicked == 1.0
-            let needed = i + 1.0
-            while len(_ui_btn_clicked) < needed
-              push(_ui_btn_clicked, 0.0)
+          let mut new_state = 0.0
+          if hit == 1.0
+            if mdown == 1.0
+              new_state = 2.0
+            else
+              new_state = 1.0
             end
-            _ui_btn_clicked[i] = 1.0
-            clicked_widget = i
+            if clicked == 1.0
+              let needed = i + 1.0
+              while len(_ui_btn_clicked) < needed
+                push(_ui_btn_clicked, 0.0)
+              end
+              _ui_btn_clicked[i] = 1.0
+              clicked_widget = i
+            end
+          end
+
+          if new_state != old_state
+            _ui_state[i] = new_state
+            let _v = ui_button_update_visual(i)
+            let _d = ui_mark_dirty()
           end
         end
 
-        if new_state != old_state
-          _ui_state[i] = new_state
-          let _v = ui_button_update_visual(i)
-          let _d = ui_mark_dirty()
-        end
-      end
+        // ── Checkboxes ──
+        if wtype == UI_CHECKBOX
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
 
-      // ── Checkboxes ──
-      if wtype == UI_CHECKBOX
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
-
-        if hit == 1.0
-          if clicked == 1.0
-            let _t = ui_checkbox_toggle(i)
-            clicked_widget = i
+          if hit == 1.0
+            if clicked == 1.0
+              let _t = ui_checkbox_toggle(i)
+              clicked_widget = i
+            end
           end
         end
-      end
 
-      // ── Text inputs ──
-      if wtype == UI_TEXTINPUT
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+        // ── Text inputs ──
+        if wtype == UI_TEXTINPUT
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
 
-        if hit == 1.0
-          if clicked == 1.0
-            clicked_widget = i
+          if hit == 1.0
+            if clicked == 1.0
+              clicked_widget = i
+            end
           end
         end
-      end
 
-      // ── Sliders ──
-      if wtype == UI_SLIDER
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+        // ── Sliders ──
+        if wtype == UI_SLIDER
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
 
-        if hit == 1.0
-          if mdown == 1.0
-            clicked_widget = i
+          if hit == 1.0
+            if mdown == 1.0
+              clicked_widget = i
+            end
           end
         end
-      end
 
-      // ── Radio buttons ──
-      if wtype == UI_RADIO
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+        // ── Radio buttons ──
+        if wtype == UI_RADIO
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
 
-        if hit == 1.0
-          if clicked == 1.0
-            let _rc = ui_radio_click(i)
-            clicked_widget = i
+          if hit == 1.0
+            if clicked == 1.0
+              let _rc = ui_radio_click(i)
+              clicked_widget = i
+            end
           end
         end
-      end
 
-      // ── Toggle switches ──
-      if wtype == UI_TOGGLE
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+        // ── Toggle switches ──
+        if wtype == UI_TOGGLE
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
 
-        if hit == 1.0
-          if clicked == 1.0
-            let _tt = ui_toggle_toggle(i)
-            clicked_widget = i
+          if hit == 1.0
+            if clicked == 1.0
+              let _tt = ui_toggle_toggle(i)
+              clicked_widget = i
+            end
           end
         end
-      end
 
-      // ── Spinbox display ──
-      if wtype == UI_SPINBOX
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+        // ── Spinbox display ──
+        if wtype == UI_SPINBOX
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
 
-        if hit == 1.0
-          if clicked == 1.0
-            clicked_widget = i
+          if hit == 1.0
+            if clicked == 1.0
+              clicked_widget = i
+            end
           end
         end
-      end
 
-      // ── Listbox ──
-      if wtype == UI_LISTBOX
-        let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+        // ── Listbox ──
+        if wtype == UI_LISTBOX
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
 
-        if hit == 1.0
-          if clicked == 1.0
-            clicked_widget = i
-            // Calculate which row was clicked
-            let local_y = my - _ui_y[i]
-            let row = floor(local_y / UI_LISTBOX_ROW_H)
-            let scroll = _ui_lb_scroll[i]
-            let item_idx = scroll + row
-            let total_items = _ui_lb_item_count[i]
-            if item_idx < total_items
-              let _ls = ui_listbox_set(i, item_idx)
+          if hit == 1.0
+            if clicked == 1.0
+              clicked_widget = i
+              // Calculate which row was clicked
+              let local_y = my - _ui_y[i]
+              let row = floor(local_y / UI_LISTBOX_ROW_H)
+              let scroll = _ui_lb_scroll[i]
+              let item_idx = scroll + row
+              let total_items = _ui_lb_item_count[i]
+              if item_idx < total_items
+                let _ls = ui_listbox_set(i, item_idx)
+              end
+            end
+          end
+        end
+
+        // ── Scroll containers ──
+        if wtype == UI_SCROLL
+          let hit = ui_hit_test(mx, my, _ui_x[i], _ui_y[i], _ui_w[i], _ui_h[i])
+
+          if hit == 1.0
+            if clicked == 1.0
+              clicked_widget = i
             end
           end
         end
@@ -319,6 +350,9 @@ fn ui_is_focusable(wtype)
     return 1.0
   end
   if wtype == UI_SPINBOX
+    return 1.0
+  end
+  if wtype == UI_SCROLL
     return 1.0
   end
   return 0.0

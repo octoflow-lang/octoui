@@ -195,6 +195,36 @@ fn ui_tree_is_container(id)
   return 0.0
 end
 
+// Check if a widget is a descendant of an ancestor (up to 4 levels)
+fn ui_tree_is_descendant(widget_id, ancestor_id)
+  if widget_id == ancestor_id
+    return 1.0
+  end
+  let p1 = _ui_parent[widget_id]
+  if p1 == ancestor_id
+    return 1.0
+  end
+  if p1 >= 0.0
+    let p2 = _ui_parent[p1]
+    if p2 == ancestor_id
+      return 1.0
+    end
+    if p2 >= 0.0
+      let p3 = _ui_parent[p2]
+      if p3 == ancestor_id
+        return 1.0
+      end
+      if p3 >= 0.0
+        let p4 = _ui_parent[p3]
+        if p4 == ancestor_id
+          return 1.0
+        end
+      end
+    end
+  end
+  return 0.0
+end
+
 // Set widget visibility (1.0 = visible, 0.0 = hidden)
 // Hidden widgets are skipped in rendering, layout sizing, and tab navigation.
 fn ui_tree_set_visible(id, flag)
