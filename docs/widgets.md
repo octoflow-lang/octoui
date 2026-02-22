@@ -18,6 +18,7 @@
 | UI_LISTBOX | 12.0 | Selectable list |
 | UI_SPINBOX | 13.0 | Numeric up/down |
 | UI_SCROLL | 14.0 | Scroll container |
+| UI_TABLE | 15.0 | Data table |
 
 ## Core Widgets
 
@@ -658,6 +659,68 @@ let _np = ui_notify_process()
 
 **Behavior:** Notifications appear at the top-right corner, auto-dismiss after ~3 seconds (~180 frames). If multiple notifications are queued, they display one at a time in FIFO order. Notifications render as overlay on top of all other widgets.
 
+## Data Widgets
+
+### Table — `widgets/data/table.flow`
+
+A data table with fixed header row and virtual-list scrollable body. Only visible rows have render widgets — data for all rows is stored in flat arrays.
+
+```
+use "octoui/widgets/data/table"
+
+// Create table (body_h=192px viewport, 24px rows = 8 visible)
+let tbl = ui_table(parent, 192.0, 24.0)
+
+// Define columns
+let _c1 = ui_table_column(tbl, "NAME", 140.0)
+let _c2 = ui_table_column(tbl, "AGE", 60.0)
+let _c3 = ui_table_column(tbl, "CITY", 100.0)
+let _fin = ui_table_finalize(tbl)
+
+// Add data cells (auto-wraps into rows at column count)
+let _c = ui_table_cell(tbl, "ALICE")
+let _c = ui_table_cell(tbl, "30")
+let _c = ui_table_cell(tbl, "NYC")      // row 0 complete
+let _c = ui_table_cell(tbl, "BOB")
+let _c = ui_table_cell(tbl, "25")
+let _c = ui_table_cell(tbl, "LA")       // row 1 complete
+
+// After layout, refresh table positions:
+let _l = ui_layout_update()
+let _r = ui_table_refresh_all()
+
+// In event loop:
+let _tp = ui_table_process(mx, my, clicked)    // mouse clicks
+let _tk = ui_table_process_key(key)            // keyboard nav
+
+// Get selection:
+let sel = ui_table_selected_row(tbl)   // -1 if none
+```
+
+**Functions:**
+
+| Function | Returns | Description |
+|----------|---------|-------------|
+| `ui_table(parent, body_h, row_h)` | table ID | Create table container |
+| `ui_table_column(table, label, width)` | 0.0 | Add a column |
+| `ui_table_finalize(table)` | 0.0 | Create display row widgets |
+| `ui_table_cell(table, text)` | 0.0 | Add a cell value |
+| `ui_table_refresh(table)` | 0.0 | Update display positions |
+| `ui_table_refresh_all()` | 0.0 | Refresh all tables |
+| `ui_table_selected_row(table)` | row index | Get selected row (-1 = none) |
+| `ui_table_process(mx, my, clicked)` | 0.0 | Process mouse clicks |
+| `ui_table_process_key(key)` | 0.0 | Process keyboard navigation |
+
+**Features:**
+- Fixed header row with column labels
+- Alternating row colors (BG/SURFACE striping)
+- Row selection via click (click again to deselect)
+- Keyboard navigation: Up/Down, Home/End, PageUp/PageDown
+- Virtual list: only viewport rows have render widgets
+- Auto-scrolling to keep selection visible
+
+---
+
 ## Reactive State
 
 ```
@@ -679,7 +742,7 @@ let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox, Scroll.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox, Scroll, Table.
 
 **Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
 
@@ -729,6 +792,9 @@ let key = ui_key_down()  // Get last key name (" " if none)
 | Up/Down | Scroll | Scroll by 20px |
 | PageUp/Down | Scroll | Scroll by viewport height |
 | Home/End | Scroll | Scroll to top/bottom |
+| Up/Down | Table | Move row selection |
+| PageUp/Down | Table | Jump selection by viewport rows |
+| Home/End | Table | Select first/last row |
 | Escape | Modal | Close active modal dialog |
 
 ## Tree Operations

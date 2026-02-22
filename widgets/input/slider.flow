@@ -15,6 +15,7 @@ let mut _ui_slider_min = []
 let mut _ui_slider_max = []
 let mut _ui_slider_val = []
 let mut _ui_slider_handle = []
+let mut _ui_slider_fill = []
 
 // Handle width in pixels
 let UI_SLIDER_HANDLE_W = 12.0
@@ -32,9 +33,13 @@ fn ui_slider(parent, w, h, min_val, max_val, initial)
   let track = ui_tree_add(UI_SLIDER, parent, w, h, " ")
   let _tc = ui_tree_set_color_themed(track, UI_COLOR_BORDER)
 
+  // Fill rect (shows filled portion from left to handle)
+  let fill = ui_tree_add(UI_BOX, track, 0.0, h, " ")
+  let _fc = ui_tree_set_color_themed(fill, UI_COLOR_PRIMARY)
+
   // Handle
   let handle = ui_tree_add(UI_BOX, track, UI_SLIDER_HANDLE_W, h, " ")
-  let _hc = ui_tree_set_color_themed(handle, UI_COLOR_PRIMARY)
+  let _hc = ui_tree_set_color_themed(handle, UI_COLOR_ACTIVE)
 
   // Store slider data
   let needed = track + 1.0
@@ -43,11 +48,13 @@ fn ui_slider(parent, w, h, min_val, max_val, initial)
     push(_ui_slider_max, 1.0)
     push(_ui_slider_val, 0.0)
     push(_ui_slider_handle, 0.0)
+    push(_ui_slider_fill, 0.0)
   end
   _ui_slider_min[track] = min_val
   _ui_slider_max[track] = max_val
   _ui_slider_val[track] = initial
   _ui_slider_handle[track] = handle
+  _ui_slider_fill[track] = fill
 
   return track
 end
@@ -68,6 +75,7 @@ fn ui_slider_set(track_id, val)
     push(_ui_slider_max, 1.0)
     push(_ui_slider_val, 0.0)
     push(_ui_slider_handle, 0.0)
+    push(_ui_slider_fill, 0.0)
   end
   // Clamp
   let mn = _ui_slider_min[track_id]
@@ -137,12 +145,13 @@ fn ui_slider_process(mouse_x, mouse_y, mouse_down)
   return 0.0
 end
 
-// Update handle position based on current value
+// Update handle and fill rect positions based on current value
 fn ui_slider_update_handle(track_id)
   let handle_id = _ui_slider_handle[track_id]
   let sx = _ui_x[track_id]
   let sy = _ui_y[track_id]
   let sw = _ui_w[track_id]
+  let sh = _ui_h[track_id]
   let mn = _ui_slider_min[track_id]
   let mx = _ui_slider_max[track_id]
   let val = _ui_slider_val[track_id]
@@ -159,9 +168,27 @@ fn ui_slider_update_handle(track_id)
     pct = 1.0
   end
 
-  _ui_x[handle_id] = sx + pct * usable_w
+  let handle_x = sx + pct * usable_w
+  _ui_x[handle_id] = handle_x
   _ui_y[handle_id] = sy
   _ui_dirty[handle_id] = 1.0
+
+  // Update fill rect (left edge to handle position)
+  if track_id < len(_ui_slider_fill)
+    let fill_id = _ui_slider_fill[track_id]
+    if fill_id > 0.0
+      let fill_w = handle_x - sx + UI_SLIDER_HANDLE_W / 2.0
+      if fill_w < 0.0
+        fill_w = 0.0
+      end
+      _ui_x[fill_id] = sx
+      _ui_y[fill_id] = sy
+      _ui_w[fill_id] = fill_w
+      _ui_h[fill_id] = sh
+      _ui_dirty[fill_id] = 1.0
+    end
+  end
+
   return 0.0
 end
 

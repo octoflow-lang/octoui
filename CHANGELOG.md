@@ -55,8 +55,13 @@
 - Keyboard scroll navigation (Up/Down/PageUp/PageDown/Home/End)
 - Scrollbar mouse interaction (thumb drag + track click-to-page)
 - CPU viewport clipping (partial children clipped at scroll container boundary)
-- 17 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll
+- Slider fill track (colored fill from left edge to handle position)
+- Data table widget (virtual-list, fixed header, scrollable body, row selection)
+- Cell-by-cell row construction (auto-wraps at column count)
+- Alternating row colors (BG/SURFACE striping)
+- Table keyboard navigation (Up/Down/Home/End/PageUp/PageDown)
+- 18 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Tests: 18/18 passing (12 tree + 6 kernel)
