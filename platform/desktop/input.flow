@@ -203,6 +203,45 @@ fn ui_process_input()
     let _tf = ui_tab_focus()
   end
 
+  // Keyboard activation: Space/Enter on focused widget
+  if _ui_focus_id >= 0.0
+    if _ui_focus_id < n
+      let ftype = _ui_types[_ui_focus_id]
+
+      // Space or Enter activates focused button
+      if _ui_key_down == "space"
+        if ftype == UI_BUTTON
+          let needed2 = _ui_focus_id + 1.0
+          while len(_ui_btn_clicked) < needed2
+            push(_ui_btn_clicked, 0.0)
+          end
+          _ui_btn_clicked[_ui_focus_id] = 1.0
+          _ui_state[_ui_focus_id] = 2.0
+          let _v = ui_button_update_visual(_ui_focus_id)
+          let _d = ui_mark_dirty()
+        end
+        if ftype == UI_CHECKBOX
+          let _t = ui_checkbox_toggle(_ui_focus_id)
+        end
+        if ftype == UI_RADIO
+          let _rc = ui_radio_click(_ui_focus_id)
+        end
+      end
+      if _ui_key_down == "enter"
+        if ftype == UI_BUTTON
+          let needed3 = _ui_focus_id + 1.0
+          while len(_ui_btn_clicked) < needed3
+            push(_ui_btn_clicked, 0.0)
+          end
+          _ui_btn_clicked[_ui_focus_id] = 1.0
+          _ui_state[_ui_focus_id] = 2.0
+          let _v2 = ui_button_update_visual(_ui_focus_id)
+          let _d2 = ui_mark_dirty()
+        end
+      end
+    end
+  end
+
   return 0.0
 end
 

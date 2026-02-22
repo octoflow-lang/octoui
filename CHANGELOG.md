@@ -30,7 +30,12 @@
 - Label widget (dimmed label + colored value pair)
 - Tab key navigation (cycles focus through all focusable widgets)
 - Focus border highlight (2px primary-color border on focused widget)
+- Space/Enter keyboard activation for focused buttons
+- Space key toggles focused checkboxes and radio buttons
+- Enter key submission for text inputs (ui_textinput_submitted)
+- Arrow key control for focused sliders (Left/Right adjusts value)
 - 10 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label
+- Full keyboard accessibility (Tab + Space + Enter + arrows)
 - Examples: hello, counter, dashboard, timer, form, settings
-- Documentation: quickstart, architecture, widgets (all Phase 3 widgets)
+- Documentation: quickstart, architecture, widgets (all widgets + keyboard)
 - Tests: 18/18 passing (12 tree + 6 kernel)

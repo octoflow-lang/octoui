@@ -76,6 +76,8 @@ end
 
 **Click behavior:** Press-to-click (fires on mouse-down). The visual press state and any state updates render in the same frame for instant responsiveness.
 
+**Keyboard:** Space or Enter activates the focused button.
+
 **States:**
 - Normal (0) — Surface color
 - Hovered (1) — Hover color
@@ -169,7 +171,7 @@ let _s = ui_checkbox_set(chk, 0.0)  // Uncheck
 - `label` — Text shown next to checkbox
 
 **Visual:** Unchecked = border color box. Checked = primary color fill.
-Click toggles state automatically via the input system.
+Click or Space key (when focused) toggles state automatically via the input system.
 
 ### Text Input — `widgets/input/textinput.flow`
 
@@ -197,8 +199,11 @@ let text = ui_textinput_value(input)
 - `ui_textinput_value(id)` — Get current text
 - `ui_textinput_set(id, text)` — Set text programmatically
 - `ui_textinput_process_key(key)` — Process keyboard input for focused widget
+- `ui_textinput_submitted(id)` — Returns 1.0 if Enter was pressed this frame
 
 **Focus:** Click the text input to focus it. Only the focused input receives keyboard events. A cursor is displayed when focused.
+
+**Enter key:** Press Enter to submit. Check with `ui_textinput_submitted(id)` each frame.
 
 ### Slider — `widgets/input/slider.flow`
 
@@ -228,7 +233,10 @@ let val = ui_slider_value(slider)
 - `ui_slider_value(id)` — Get current value
 - `ui_slider_set(id, val)` — Set value programmatically
 - `ui_slider_process(mx, my, mdown)` — Process mouse drag (call each frame)
+- `ui_slider_process_key(key)` — Process arrow key input for focused slider
 - `ui_slider_update_all()` — Position all handles after layout
+
+**Keyboard:** Left/Right arrow keys adjust value by 5% of range when slider is focused.
 
 ### Radio Button — `widgets/input/radio.flow`
 
@@ -256,6 +264,8 @@ let _s = ui_radio_set(group, 1.0)  // Select "OPTION B"
 - `ui_radio_set(group, index)` — Set selection programmatically
 
 **Visual:** Unselected = border color box. Selected = primary color fill. First option is selected by default.
+
+**Keyboard:** Space key selects the focused radio button.
 
 ## Layout Widgets
 
@@ -342,7 +352,19 @@ let key = ui_key_down()  // Get last key name (" " if none)
 - `ui_key_pressed(key)` — Returns 1.0 if key was pressed this frame
 - `ui_key_down()` — Returns key name of last key-down event
 
-**Key names:** `"escape"`, `"space"`, `"enter"`, `"a"`-`"z"`, `"0"`-`"9"`, etc.
+**Key names:** `"escape"`, `"space"`, `"enter"`, `"left"`, `"right"`, `"tab"`, `"backspace"`, `"a"`-`"z"`, `"0"`-`"9"`, etc.
+
+**Built-in keyboard actions** (handled automatically by `ui_process_input`):
+
+| Key | Widget | Action |
+|-----|--------|--------|
+| Tab | Any | Cycle focus to next focusable widget |
+| Space | Button | Click (fires ui_button_clicked) |
+| Space | Checkbox | Toggle checked state |
+| Space | Radio | Select this option |
+| Enter | Button | Click (fires ui_button_clicked) |
+| Enter | TextInput | Submit (fires ui_textinput_submitted) |
+| Left/Right | Slider | Adjust value by 5% of range |
 
 ## Tree Operations
 

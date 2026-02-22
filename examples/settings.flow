@@ -5,9 +5,12 @@
 // Tab navigation cycles through all interactive widgets.
 //
 // Controls:
-//   TAB    — Cycle focus
-//   ESCAPE — Quit
-//   Click  — Interact with widgets
+//   TAB        — Cycle focus
+//   SPACE      — Toggle checkbox/radio, click button
+//   ENTER      — Click button
+//   LEFT/RIGHT — Adjust focused slider
+//   ESCAPE     — Quit
+//   Click      — Interact with widgets
 //
 // Run: octoflow run octoui/examples/settings.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
 
@@ -120,8 +123,9 @@ while running == 1.0
   let key = ui_key_down()
   let _tk = ui_textinput_process_key(key)
 
-  // Process sliders
+  // Process sliders (mouse + keyboard)
   let _sp2 = ui_slider_process(ui_mouse_x(), ui_mouse_y(), ui_mouse_down())
+  let _sk = ui_slider_process_key(key)
 
   // Update slider display values
   let vol = floor(ui_slider_value(vol_slider))

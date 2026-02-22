@@ -13,6 +13,9 @@ use "../../themes/dark"
 // Per-textinput value tracking (parallel to widget IDs)
 let mut _ui_ti_values = []
 
+// Per-frame submission tracking (Enter key)
+let mut _ui_ti_submitted = []
+
 // Create a text input widget
 // parent: parent widget ID
 // w: width in pixels
@@ -56,10 +59,31 @@ fn ui_textinput_set(id, text)
   return 0.0
 end
 
+// Check if a text input was submitted (Enter pressed) this frame
+fn ui_textinput_submitted(id)
+  if id < len(_ui_ti_submitted)
+    return _ui_ti_submitted[id]
+  end
+  return 0.0
+end
+
+// Clear per-frame submission states (called at start of process_key)
+fn ui_textinput_clear_submitted()
+  let mut i = 0.0
+  while i < len(_ui_ti_submitted)
+    _ui_ti_submitted[i] = 0.0
+    i = i + 1.0
+  end
+  return 0.0
+end
+
 // Process keyboard input for focused text input
 // Call this each frame after ui_process_input()
 // key: the key name from ui_key_down()
 fn ui_textinput_process_key(key)
+  // Clear per-frame submission states
+  let _cs = ui_textinput_clear_submitted()
+
   let focus = _ui_focus_id
   if focus < 0.0
     return 0.0
@@ -74,6 +98,16 @@ fn ui_textinput_process_key(key)
 
   // Skip if no key pressed this frame
   if key == " "
+    return 0.0
+  end
+
+  // Enter key: mark as submitted
+  if key == "enter"
+    let needed = focus + 1.0
+    while len(_ui_ti_submitted) < needed
+      push(_ui_ti_submitted, 0.0)
+    end
+    _ui_ti_submitted[focus] = 1.0
     return 0.0
   end
 

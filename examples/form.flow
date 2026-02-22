@@ -1,12 +1,13 @@
 // examples/form.flow — OctoUI Form Demo
 //
-// Demonstrates all Phase 2 input widgets: text input, checkbox, slider.
-// Shows focus system, keyboard input, mouse drag.
+// Demonstrates input widgets: text input, checkbox, slider.
+// Full keyboard accessibility: Tab, Space, Enter, arrow keys.
 //
 // Controls:
-//   Click text input to focus, type to enter text, backspace to delete
-//   Click checkbox to toggle
-//   Click+drag slider to change value
+//   TAB    — Cycle focus
+//   SPACE  — Toggle checkbox, click button
+//   ENTER  — Submit text input, click button
+//   LEFT/RIGHT — Adjust focused slider
 //   ESCAPE — Quit
 //
 // Run: octoflow run octoui/examples/form.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
@@ -105,15 +106,23 @@ while running == 1.0
   let key = ui_key_down()
   let _tk = ui_textinput_process_key(key)
 
-  // Process slider drag
+  // Process slider drag + keyboard
   let _sd2 = ui_slider_process(ui_mouse_x(), ui_mouse_y(), ui_mouse_down())
+  let _sk = ui_slider_process_key(key)
 
   // Update slider display value
   let vol = ui_slider_value(vol_slider)
   let vol_int = floor(vol)
   let _sv = ui_state_set(slider_state, vol_int)
 
-  // Button clicks
+  // Enter key submits text input
+  if ui_textinput_submitted(name_input) == 1.0
+    let name = ui_textinput_value(name_input)
+    let _st = ui_tree_set_text(status, "HELLO " + name)
+    let _d = ui_mark_dirty()
+  end
+
+  // Button clicks (mouse or keyboard)
   if ui_button_clicked(btn_save) == 1.0
     let _st = ui_tree_set_text(status, "SAVED!")
     let _d = ui_mark_dirty()

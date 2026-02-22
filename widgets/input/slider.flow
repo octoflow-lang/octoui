@@ -185,3 +185,37 @@ fn ui_slider_update_all()
   end
   return 0.0
 end
+
+// Process arrow key input for focused slider
+// key: key name from ui_key_down()
+// Left/Right arrows adjust value by 5% of range
+fn ui_slider_process_key(key)
+  let focus = _ui_focus_id
+  if focus < 0.0
+    return 0.0
+  end
+  if focus >= len(_ui_types)
+    return 0.0
+  end
+  if _ui_types[focus] != UI_SLIDER
+    return 0.0
+  end
+  if focus >= len(_ui_slider_val)
+    return 0.0
+  end
+
+  let mn = _ui_slider_min[focus]
+  let mx = _ui_slider_max[focus]
+  let step = (mx - mn) / 20.0
+  let val = _ui_slider_val[focus]
+
+  if key == "left"
+    let _s = ui_slider_set(focus, val - step)
+    let _d = ui_mark_dirty()
+  end
+  if key == "right"
+    let _s = ui_slider_set(focus, val + step)
+    let _d = ui_mark_dirty()
+  end
+  return 0.0
+end
