@@ -20,6 +20,15 @@ let mut _ui_ti_cursor = []
 // Per-frame submission tracking (Enter key)
 let mut _ui_ti_submitted = []
 
+// Placeholder text (shown dimmed when empty and unfocused)
+let mut _ui_ti_placeholder = []
+
+// Readonly mode (1.0 = no editing, no cursor)
+let mut _ui_ti_readonly = []
+
+// Password mode (1.0 = render * instead of characters)
+let mut _ui_ti_password = []
+
 // Create a text input widget
 // parent: parent widget ID
 // w: width in pixels
@@ -29,7 +38,7 @@ fn ui_textinput(parent, w, h)
   let id = ui_tree_add(UI_TEXTINPUT, parent, w, h, " ")
   let _s = ui_tree_set_color_themed(id, UI_COLOR_SURFACE)
 
-  // Track value and cursor
+  // Track value, cursor, and modes
   let needed = id + 1.0
   while len(_ui_ti_values) < needed
     push(_ui_ti_values, " ")
@@ -37,8 +46,20 @@ fn ui_textinput(parent, w, h)
   while len(_ui_ti_cursor) < needed
     push(_ui_ti_cursor, 0.0)
   end
+  while len(_ui_ti_placeholder) < needed
+    push(_ui_ti_placeholder, " ")
+  end
+  while len(_ui_ti_readonly) < needed
+    push(_ui_ti_readonly, 0.0)
+  end
+  while len(_ui_ti_password) < needed
+    push(_ui_ti_password, 0.0)
+  end
   _ui_ti_values[id] = " "
   _ui_ti_cursor[id] = 0.0
+  _ui_ti_placeholder[id] = " "
+  _ui_ti_readonly[id] = 0.0
+  _ui_ti_password[id] = 0.0
 
   return id
 end
@@ -116,6 +137,20 @@ fn ui_textinput_process_key(key)
   end
   if _ui_types[focus] != UI_TEXTINPUT
     return 0.0
+  end
+
+  // Skip editing for readonly inputs (still allow Enter for submit)
+  if focus < len(_ui_ti_readonly)
+    if _ui_ti_readonly[focus] == 1.0
+      if key == "enter"
+        let needed_r = focus + 1.0
+        while len(_ui_ti_submitted) < needed_r
+          push(_ui_ti_submitted, 0.0)
+        end
+        _ui_ti_submitted[focus] = 1.0
+      end
+      return 0.0
+    end
   end
 
   // Skip if no key pressed this frame
@@ -265,5 +300,38 @@ fn ui_textinput_process_key(key)
     return 0.0
   end
 
+  return 0.0
+end
+
+// Set placeholder text (shown dimmed when input is empty and unfocused)
+fn ui_textinput_set_placeholder(id, text)
+  let needed = id + 1.0
+  while len(_ui_ti_placeholder) < needed
+    push(_ui_ti_placeholder, " ")
+  end
+  _ui_ti_placeholder[id] = text
+  let _d = ui_mark_dirty()
+  return 0.0
+end
+
+// Set readonly mode (1.0 = readonly, 0.0 = editable)
+fn ui_textinput_set_readonly(id, flag)
+  let needed = id + 1.0
+  while len(_ui_ti_readonly) < needed
+    push(_ui_ti_readonly, 0.0)
+  end
+  _ui_ti_readonly[id] = flag
+  let _d = ui_mark_dirty()
+  return 0.0
+end
+
+// Set password mode (1.0 = show *, 0.0 = show text)
+fn ui_textinput_set_password(id, flag)
+  let needed = id + 1.0
+  while len(_ui_ti_password) < needed
+    push(_ui_ti_password, 0.0)
+  end
+  _ui_ti_password[id] = flag
+  let _d = ui_mark_dirty()
   return 0.0
 end

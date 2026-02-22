@@ -208,12 +208,21 @@ let text = ui_textinput_value(input)
 - `ui_textinput_set(id, text)` — Set text programmatically
 - `ui_textinput_process_key(key)` — Process keyboard input for focused widget
 - `ui_textinput_submitted(id)` — Returns 1.0 if Enter was pressed this frame
+- `ui_textinput_set_placeholder(id, text)` — Set placeholder text (shown dimmed when empty and unfocused)
+- `ui_textinput_set_readonly(id, flag)` — Set readonly mode (1.0 = no editing, no cursor)
+- `ui_textinput_set_password(id, flag)` — Set password mode (1.0 = render * instead of characters)
 
 **Focus:** Click the text input to focus it. Only the focused input receives keyboard events. A cursor is displayed at the current position when focused.
 
 **Cursor movement:** Left/Right arrow keys move the cursor within the text. Home jumps to the start, End jumps to the end. Characters are inserted at the cursor position. Backspace deletes the character before the cursor, Delete removes the character after the cursor.
 
 **Enter key:** Press Enter to submit. Check with `ui_textinput_submitted(id)` each frame.
+
+**Placeholder:** Set placeholder text with `ui_textinput_set_placeholder(id, text)`. The placeholder appears dimmed when the input is empty and unfocused. When the user focuses and types, the placeholder disappears.
+
+**Password mode:** Set with `ui_textinput_set_password(id, 1.0)`. Characters render as `*` instead of their actual values. The underlying value is preserved — `ui_textinput_value(id)` returns the real text.
+
+**Readonly mode:** Set with `ui_textinput_set_readonly(id, 1.0)`. The input displays its text but cannot be edited. No cursor is shown. Enter still fires `ui_textinput_submitted`. Useful for displaying pre-filled, non-editable values.
 
 ### Slider — `widgets/input/slider.flow`
 

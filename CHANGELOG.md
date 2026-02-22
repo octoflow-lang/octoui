@@ -71,6 +71,9 @@
 - 19 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
 - Composite widgets: dropdown, tabs, spinbox, modal, progress, label, separator, tooltip, notification, section (all built from primitives)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled
+- Text input placeholder text (dimmed hint shown when empty and unfocused)
+- Text input password masking (renders * instead of characters)
+- Text input readonly mode (no editing, no cursor, still accepts Enter for submit)
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled, login
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Tests: 18/18 passing (12 tree + 6 kernel)

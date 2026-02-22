@@ -672,6 +672,8 @@ fn ui_pipeline_dispatch_button_text(vm, idx, screen_w, total)
 end
 
 // Dispatch text for a TEXTINPUT widget (left-aligned with padding, cursor when focused)
+// Supports placeholder text (dimmed, when empty+unfocused), password masking (*),
+// readonly mode (no cursor), and disabled state (dimmed).
 fn ui_pipeline_dispatch_textinput_text(vm, idx, screen_w, total)
   let text = _ui_texts[idx]
   let bx = _ui_x[idx]
@@ -686,21 +688,71 @@ fn ui_pipeline_dispatch_textinput_text(vm, idx, screen_w, total)
   let tx = bx + text_pad
   let ty = by + floor((bh - text_h) / 2.0)
 
-  // Use dimmed color for disabled text inputs
+  // Determine what text to display and its color
+  let mut display_text = text
   let mut cr = ui_theme_r(UI_COLOR_TEXT)
   let mut cg = ui_theme_g(UI_COLOR_TEXT)
   let mut cb = ui_theme_b(UI_COLOR_TEXT)
+
+  // Check if input is empty (text == " ")
+  let mut is_empty = 0.0
+  if text == " "
+    is_empty = 1.0
+  end
+
+  // Placeholder: show dimmed placeholder text when empty and unfocused
+  if is_empty == 1.0
+    if idx != _ui_focus_id
+      if idx < len(_ui_ti_placeholder)
+        let ph = _ui_ti_placeholder[idx]
+        if ph != " "
+          display_text = ph
+          cr = ui_theme_r(UI_COLOR_TEXT_DIM)
+          cg = ui_theme_g(UI_COLOR_TEXT_DIM)
+          cb = ui_theme_b(UI_COLOR_TEXT_DIM)
+        end
+      end
+    end
+  end
+
+  // Password mode: replace display text with * characters
+  let mut is_password = 0.0
+  if idx < len(_ui_ti_password)
+    if _ui_ti_password[idx] == 1.0
+      is_password = 1.0
+    end
+  end
+
+  // Disabled: use dimmed color
   if _ui_enabled[idx] == 0.0
     cr = ui_theme_r(UI_COLOR_TEXT_DIM)
     cg = ui_theme_g(UI_COLOR_TEXT_DIM)
     cb = ui_theme_b(UI_COLOR_TEXT_DIM)
   end
 
-  let tlen = len(text)
+  // Readonly: slightly dimmed
+  if idx < len(_ui_ti_readonly)
+    if _ui_ti_readonly[idx] == 1.0
+      if _ui_enabled[idx] == 1.0
+        // Readonly but enabled: use normal text color (content is visible)
+        cr = ui_theme_r(UI_COLOR_TEXT)
+        cg = ui_theme_g(UI_COLOR_TEXT)
+        cb = ui_theme_b(UI_COLOR_TEXT)
+      end
+    end
+  end
+
+  let tlen = len(display_text)
   let mut ti = 0.0
   while ti < tlen
-    let ch = char_at(text, ti)
-    let ch_code = ord(ch)
+    let mut ch_code = ord(char_at(display_text, ti))
+
+    // Password mode: replace all visible chars with * (ASCII 42)
+    if is_password == 1.0
+      if is_empty == 0.0
+        ch_code = 42.0
+      end
+    end
 
     // Skip space character (used as "empty")
     if ch_code > 32.0
@@ -734,10 +786,16 @@ fn ui_pipeline_dispatch_textinput_text(vm, idx, screen_w, total)
     ti = ti + 1.0
   end
 
-  // Draw cursor if this widget has focus and is enabled
+  // Draw cursor if focused, enabled, and not readonly
   if idx == _ui_focus_id
     if _ui_enabled[idx] == 0.0
       return 0.0
+    end
+    // Skip cursor for readonly inputs
+    if idx < len(_ui_ti_readonly)
+      if _ui_ti_readonly[idx] == 1.0
+        return 0.0
+      end
     end
     // Use cursor position from textinput module (if available)
     let mut cpos = tlen
