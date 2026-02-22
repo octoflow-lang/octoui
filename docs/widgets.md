@@ -71,6 +71,8 @@ end
 - `ui_button_clear_clicks()` — Clears per-frame click state (called by input system)
 - `ui_button_update_visual(id)` — Updates button color based on state
 
+**Click behavior:** Press-to-click (fires on mouse-down). The visual press state and any state updates render in the same frame for instant responsiveness.
+
 **States:**
 - Normal (0) — Surface color
 - Hovered (1) — Hover color
