@@ -498,6 +498,11 @@ fn ui_pipeline_render()
   // ── 5. Execute on GPU (single vkQueueSubmit) ──
   let _ex = vm_execute(prog)
 
+  // ── 5b. Free the program immediately — prevents VmProgram accumulation ──
+  // vm_build creates a new VmProgram (VkCommandBuffer + pipeline) every frame.
+  // Without vm_free_prog, VM_PROGRAMS grows unbounded → lag → OOM/shutdown.
+  let _fp = vm_free_prog(prog)
+
   // ── 6. Download framebuffer channels ──
   // Must use `let` so eval_array_fn handles vm_read_globals (array-returning).
   // GPU_ARRAYS stores by name; window_draw finds them via gpu_array_get.

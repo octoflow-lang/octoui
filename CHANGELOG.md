@@ -2,6 +2,10 @@
 
 ## v0.1.0 (unreleased)
 
+### Fixed
+- **Critical stability fix**: `vm_build()` leaked a `VmProgram` (VkCommandBuffer + all pipelines) every frame — VM_PROGRAMS hashmap grew unbounded causing progressive lag and eventual GPU resource exhaustion. Fixed by adding `vm_free_prog(prog_id)` builtin that drops the VmProgram after `vm_execute()` in `engine/pipeline.flow`.
+- **Critical performance fix**: `vm_build_program` compiled SPIR-V to GPU-native pipelines fresh on every call — creating 50-200 pipeline objects per frame (each ~10-15ms). Added `VM_PIPELINE_CACHE` keyed by `(device, spirv_hash, binding_count, pc_size)` so each unique shader compiles only once (first frame). Subsequent frames get instant cache hits. OctoUI uses 3 SPIR-V kernels — cold start compiles them once, all frames thereafter are cache hits.
+
 ### Added
 - GPU kernel emitters: ui_clear, ui_rect, ui_text
 - Widget tree with parallel array storage
