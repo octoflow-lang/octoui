@@ -3,7 +3,7 @@
 ![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)
 ![Built with OctoFlow](https://img.shields.io/badge/built%20with-OctoFlow-orange)
 ![Dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen)
-![Tests: 71 passing](https://img.shields.io/badge/tests-71%20passing-brightgreen)
+![Tests: 82 passing](https://img.shields.io/badge/tests-82%20passing-brightgreen)
 ![Kernels: 3 SPIR-V](https://img.shields.io/badge/kernels-3%20SPIR--V-blue)
 ![Widgets: 21](https://img.shields.io/badge/widgets-21-blue)
 
@@ -110,11 +110,11 @@ octoui/
                  spinbox, listbox, textarea, contextmenu
     layout/      row, column, scroll, section, menubar, statusbar
     data/        table, treeview, listview
-  themes/        dark.flow, light.flow
+  themes/        dark.flow, light.flow, terminal.flow
   platform/      Win32 window + input events
   state/         Reactive signals + bindings
   examples/      20 example apps
-  tests/         71 tests (12 tree + 6 kernel + 5 pipeline + 11 dialog + 12 tabs + 13 dropdown + 12 scrollview)
+  tests/         82 tests (12 tree + 6 kernel + 5 pipeline + 11 dialog + 12 tabs + 13 dropdown + 12 scrollview + 11 theming)
   docs/          quickstart, architecture, widget reference
 ```
 
@@ -135,6 +135,7 @@ octoflow run octoui/tests/test_dialog.flow --allow-read --allow-write --allow-ff
 octoflow run octoui/tests/test_tabs_panel.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
 octoflow run octoui/tests/test_dropdown_tree.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
 octoflow run octoui/tests/test_scrollview.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
+octoflow run octoui/tests/test_theming.flow --allow-read --allow-write --allow-ffi --max-iters 1000000
 ```
 
 ## Requirements

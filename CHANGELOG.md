@@ -93,4 +93,5 @@
 - Composite widgets: dropdown, tabs, spinbox, modal, progress, label, separator, tooltip, notification, section, menubar, statusbar, contextmenu (all built from primitives)
 - Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled, login, menubar, contextmenu, editor, logviewer, long_list
 - Documentation: quickstart, architecture, widgets (complete reference)
-- Tests: 71/71 passing (12 tree + 6 kernel + 5 pipeline + 11 dialog + 12 tabs + 13 dropdown + 12 scrollview)
+- Terminal theme (green-on-black phosphor palette — ui_theme_load_terminal)
+- Tests: 82/82 passing (12 tree + 6 kernel + 5 pipeline + 11 dialog + 12 tabs + 13 dropdown + 12 scrollview + 11 theming)
