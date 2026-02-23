@@ -53,8 +53,7 @@ fn ui_state_set(state_id, val)
         // Update text widget width if length changed
         let new_len = len(sval)
         if new_len != old_len
-          let char_w = 10.0
-          _ui_w[wid] = new_len * char_w
+          _ui_w[wid] = ui_text_width(sval, 16.0)
           needs_layout = 1.0
         end
       end

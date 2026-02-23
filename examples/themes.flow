@@ -167,9 +167,9 @@ while running == 1.0
     let _su2 = ui_slider_update_all()
     let _tu2 = ui_toggle_update_all()
     let _r = ui_pipeline_render()
-    let _p = ui_pipeline_present()
     let _cd = ui_clear_dirty()
   else
+    let _p = ui_pipeline_present()
     let _sl = sleep(16.0)
   end
 end

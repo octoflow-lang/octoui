@@ -45,7 +45,7 @@ fn ui_toggle(parent, label)
   let _kc = ui_tree_set_color_themed(knob, UI_COLOR_TEXT)
 
   // Label text
-  let txt = ui_tree_add(UI_TEXT, row, len(label) * 10.0, 16.0, label)
+  let txt = ui_tree_add(UI_TEXT, row, ui_text_width(label, 16.0), 16.0, label)
   let _lc = ui_tree_set_color_themed(txt, UI_COLOR_TEXT)
 
   // Track state

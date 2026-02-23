@@ -9,6 +9,7 @@
 
 use "../../engine/tree"
 use "../../engine/dirty"
+use "../../engine/sdf_font"
 use "../../themes/dark"
 
 // Create a label + value pair
@@ -22,11 +23,11 @@ fn ui_label(parent, label_text, value_text, value_color)
   let _rs = ui_tree_set_spacing(row, 8.0)
 
   // Label (dimmed)
-  let lbl = ui_tree_add(UI_TEXT, row, len(label_text) * 10.0, 16.0, label_text)
+  let lbl = ui_tree_add(UI_TEXT, row, ui_text_width(label_text, 16.0), 16.0, label_text)
   let _lc = ui_tree_set_color_themed(lbl, UI_COLOR_TEXT_DIM)
 
   // Value (colored)
-  let val = ui_tree_add(UI_TEXT, row, len(value_text) * 10.0, 16.0, value_text)
+  let val = ui_tree_add(UI_TEXT, row, ui_text_width(value_text, 16.0), 16.0, value_text)
   let _vc = ui_tree_set_color_themed(val, value_color)
 
   return row
@@ -39,7 +40,7 @@ fn ui_label_set_value(row_id, new_text)
   // Value widget is always row_id + 2 (row, label text, value text)
   let val_id = row_id + 2.0
   _ui_texts[val_id] = new_text
-  _ui_w[val_id] = len(new_text) * 10.0
+  _ui_w[val_id] = ui_text_width(new_text, 16.0)
   _ui_dirty[val_id] = 1.0
   let _d = ui_mark_dirty()
   return 0.0

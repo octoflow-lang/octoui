@@ -81,7 +81,7 @@ fn ui_radio(group, label)
   end
 
   // Label text
-  let lbl = ui_tree_add(UI_TEXT, row, len(label) * 10.0, 16.0, label)
+  let lbl = ui_tree_add(UI_TEXT, row, ui_text_width(label, 16.0), 16.0, label)
   let _tc = ui_tree_set_color_themed(lbl, UI_COLOR_TEXT)
 
   return row

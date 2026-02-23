@@ -17,6 +17,7 @@
 
 use "../../engine/tree"
 use "../../engine/dirty"
+use "../../engine/sdf_font"
 use "../../themes/dark"
 
 // Textarea registry (indexed by textarea sequential index, NOT widget ID)
@@ -89,7 +90,8 @@ fn ui_textarea_set_text(widget_id, text)
     if ch_code == 10.0
       // Found newline — extract line
       if ti > line_start
-        let line = substring(text, line_start, ti)
+        let _sl = ti - line_start
+        let line = substr(text, line_start, _sl)
         push(new_lines, line)
       else
         push(new_lines, " ")
@@ -100,7 +102,8 @@ fn ui_textarea_set_text(widget_id, text)
   end
   // Last line (after last newline or entire text if no newlines)
   if line_start < tlen
-    let last_line = substring(text, line_start, tlen)
+    let _sl2 = tlen - line_start
+    let last_line = substr(text, line_start, _sl2)
     push(new_lines, last_line)
   else
     push(new_lines, " ")
@@ -132,8 +135,15 @@ fn ui_textarea_set_text(widget_id, text)
     ai = ai + 1.0
   end
 
-  // Replace the flat array
-  _ui_ta_lines = rebuilt
+  // Replace the flat array (pop all, then push from rebuilt)
+  while len(_ui_ta_lines) > 0.0
+    let _pop = pop(_ui_ta_lines)
+  end
+  let mut _ci = 0.0
+  while _ci < len(rebuilt)
+    push(_ui_ta_lines, rebuilt[_ci])
+    _ci = _ci + 1.0
+  end
 
   // Update this textarea's metadata
   _ui_ta_line_start[ta_idx] = new_start
@@ -193,7 +203,14 @@ fn ui_textarea_append_line(widget_id, text)
     ri = ri + 1.0
   end
 
-  _ui_ta_lines = rebuilt
+  while len(_ui_ta_lines) > 0.0
+    let _pop = pop(_ui_ta_lines)
+  end
+  let mut _ci = 0.0
+  while _ci < len(rebuilt)
+    push(_ui_ta_lines, rebuilt[_ci])
+    _ci = _ci + 1.0
+  end
   _ui_ta_line_count[ta_idx] = count + 1.0
 
   // Adjust start offsets for textareas after this one
@@ -354,7 +371,7 @@ fn ui_textarea_process_click(widget_id, mx, my, clicked)
   let bw = _ui_w[widget_id]
   let bh = _ui_h[widget_id]
   let line_h = 16.0
-  let char_w = 10.0
+  let font_size = 16.0
   let text_pad = 4.0
 
   // Check if click is inside textarea
@@ -373,6 +390,7 @@ fn ui_textarea_process_click(widget_id, mx, my, clicked)
 
   let scroll = _ui_ta_scroll[ta_idx]
   let count = _ui_ta_line_count[ta_idx]
+  let start = _ui_ta_line_start[ta_idx]
 
   // Calculate clicked line
   let local_y = my - by
@@ -384,11 +402,30 @@ fn ui_textarea_process_click(widget_id, mx, my, clicked)
     click_line = 0.0
   end
 
-  // Calculate clicked col
+  // Calculate clicked col (proportional: walk chars until past click x)
   let local_x = mx - bx - text_pad
-  let mut click_col = floor(local_x / char_w)
-  if click_col < 0.0
-    click_col = 0.0
+  let mut click_col = 0.0
+  if local_x > 0.0
+    let cl_text = _ui_ta_lines[start + click_line]
+    if cl_text != " "
+      let cl_len = len(cl_text)
+      let mut acc_w = 0.0
+      let mut ci = 0.0
+      let mut done = 0.0
+      while ci < cl_len
+        if done == 0.0
+          let ch_adv = ui_glyph_advance(ord(char_at(cl_text, ci))) * font_size
+          if acc_w + ch_adv * 0.5 > local_x
+            click_col = ci
+            done = 1.0
+          else
+            acc_w = acc_w + ch_adv
+            click_col = ci + 1.0
+          end
+        end
+        ci = ci + 1.0
+      end
+    end
   end
   let line_len = ui_ta_line_len(ta_idx, click_line)
   if click_col > line_len
@@ -550,10 +587,11 @@ fn ui_textarea_process_key(key)
     let mut after_text = " "
     if current != " "
       if cur_col > 0.0
-        before_text = substring(current, 0.0, cur_col)
+        before_text = substr(current, 0.0, cur_col)
       end
       if cur_col < len(current)
-        after_text = substring(current, cur_col, len(current))
+        let _sl3 = len(current) - cur_col
+        after_text = substr(current, cur_col, _sl3)
       end
     end
 
@@ -574,7 +612,14 @@ fn ui_textarea_process_key(key)
       push(rebuilt, _ui_ta_lines[ri])
       ri = ri + 1.0
     end
-    _ui_ta_lines = rebuilt
+    while len(_ui_ta_lines) > 0.0
+      let _pop = pop(_ui_ta_lines)
+    end
+    let mut _ci2 = 0.0
+    while _ci2 < len(rebuilt)
+      push(_ui_ta_lines, rebuilt[_ci2])
+      _ci2 = _ci2 + 1.0
+    end
     _ui_ta_line_count[ta_idx] = count + 1.0
 
     // Adjust start offsets for textareas after this one
@@ -599,8 +644,9 @@ fn ui_textarea_process_key(key)
       if current == " "
         return 0.0
       end
-      let before = substring(current, 0.0, cur_col - 1.0)
-      let after = substring(current, cur_col, len(current))
+      let before = substr(current, 0.0, cur_col - 1.0)
+      let _sl4 = len(current) - cur_col
+      let after = substr(current, cur_col, _sl4)
       let mut new_text = before + after
       if len(new_text) == 0.0
         new_text = " "
@@ -640,7 +686,14 @@ fn ui_textarea_process_key(key)
           end
           ri = ri + 1.0
         end
-        _ui_ta_lines = rebuilt
+        while len(_ui_ta_lines) > 0.0
+          let _pop = pop(_ui_ta_lines)
+        end
+        let mut _ci3 = 0.0
+        while _ci3 < len(rebuilt)
+          push(_ui_ta_lines, rebuilt[_ci3])
+          _ci3 = _ci3 + 1.0
+        end
         _ui_ta_line_count[ta_idx] = count - 1.0
 
         // Adjust start offsets for textareas after this one
@@ -664,8 +717,9 @@ fn ui_textarea_process_key(key)
     if cur_col < line_len
       // Delete character at cursor
       let current = _ui_ta_lines[start + cur_line]
-      let before = substring(current, 0.0, cur_col)
-      let after = substring(current, cur_col + 1.0, len(current))
+      let before = substr(current, 0.0, cur_col)
+      let _sl5 = len(current) - cur_col - 1.0
+      let after = substr(current, cur_col + 1.0, _sl5)
       let mut new_text = before + after
       if len(new_text) == 0.0
         new_text = " "
@@ -700,7 +754,14 @@ fn ui_textarea_process_key(key)
           end
           ri = ri + 1.0
         end
-        _ui_ta_lines = rebuilt
+        while len(_ui_ta_lines) > 0.0
+          let _pop = pop(_ui_ta_lines)
+        end
+        let mut _ci4 = 0.0
+        while _ci4 < len(rebuilt)
+          push(_ui_ta_lines, rebuilt[_ci4])
+          _ci4 = _ci4 + 1.0
+        end
         _ui_ta_line_count[ta_idx] = count - 1.0
 
         // Adjust start offsets
@@ -722,8 +783,9 @@ fn ui_textarea_process_key(key)
       _ui_ta_lines[start + cur_line] = "  "
       _ui_ta_cursor_col[ta_idx] = 1.0
     else
-      let before = substring(current, 0.0, cur_col)
-      let after = substring(current, cur_col, len(current))
+      let before = substr(current, 0.0, cur_col)
+      let _sl6 = len(current) - cur_col
+      let after = substr(current, cur_col, _sl6)
       _ui_ta_lines[start + cur_line] = before + " " + after
       _ui_ta_cursor_col[ta_idx] = cur_col + 1.0
     end
@@ -738,8 +800,9 @@ fn ui_textarea_process_key(key)
       _ui_ta_lines[start + cur_line] = "  "
       _ui_ta_cursor_col[ta_idx] = 2.0
     else
-      let before = substring(current, 0.0, cur_col)
-      let after = substring(current, cur_col, len(current))
+      let before = substr(current, 0.0, cur_col)
+      let _sl7 = len(current) - cur_col
+      let after = substr(current, cur_col, _sl7)
       _ui_ta_lines[start + cur_line] = before + "  " + after
       _ui_ta_cursor_col[ta_idx] = cur_col + 2.0
     end
@@ -754,8 +817,9 @@ fn ui_textarea_process_key(key)
       _ui_ta_lines[start + cur_line] = key
       _ui_ta_cursor_col[ta_idx] = 1.0
     else
-      let before = substring(current, 0.0, cur_col)
-      let after = substring(current, cur_col, len(current))
+      let before = substr(current, 0.0, cur_col)
+      let _sl8 = len(current) - cur_col
+      let after = substr(current, cur_col, _sl8)
       _ui_ta_lines[start + cur_line] = before + key + after
       _ui_ta_cursor_col[ta_idx] = cur_col + 1.0
     end

@@ -182,7 +182,7 @@ while running == 1.0
   else
     // Show selected row number (1-based for display)
     let sel_display = sel + 1.0
-    let _st = ui_tree_set_text(status_val, to_string(sel_display))
+    let _st = ui_tree_set_text(status_val, to_str(sel_display))
     // Re-layout to update text width
     let _lu = ui_layout_update()
     let _tr2 = ui_table_refresh_all()
@@ -191,9 +191,9 @@ while running == 1.0
   // Render if dirty
   if ui_is_dirty() == 1.0
     let _r = ui_pipeline_render()
-    let _p = ui_pipeline_present()
     let _cd = ui_clear_dirty()
   else
+    let _p = ui_pipeline_present()
     let _sl = sleep(16.0)
   end
 end

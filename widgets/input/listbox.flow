@@ -220,7 +220,7 @@ fn ui_listbox_refresh(lb_id)
       if found == 1.0
         // Show item text
         _ui_texts[row_widget] = found_text
-        _ui_w[row_widget] = len(found_text) * 10.0
+        _ui_w[row_widget] = ui_text_width(found_text, 16.0)
         _ui_visible[row_widget] = 1.0
         _ui_visible[row_bg_widget] = 1.0
 

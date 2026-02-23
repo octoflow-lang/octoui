@@ -62,12 +62,12 @@ fn ui_modal(w, h, title)
   let _tbs = ui_tree_set_spacing(title_bar, 0.0)
   let _tbc = ui_tree_set_color_themed(title_bar, UI_COLOR_PRIMARY)
 
-  let title_text = ui_tree_add(UI_TEXT, title_bar, len(title) * 10.0, 16.0, title)
+  let title_text = ui_tree_add(UI_TEXT, title_bar, ui_text_width(title, 16.0), 16.0, title)
   let _ttc = ui_tree_set_color_themed(title_text, UI_COLOR_TEXT)
 
   // Close button at right end
   let close_w = 28.0
-  let spacer_w = w - len(title) * 10.0 - close_w
+  let spacer_w = w - ui_text_width(title, 16.0) - close_w
   if spacer_w > 0.0
     let spacer = ui_tree_add(UI_BOX, title_bar, spacer_w, 28.0, " ")
     let _spc = ui_tree_set_color_themed(spacer, UI_COLOR_PRIMARY)

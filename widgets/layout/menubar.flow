@@ -21,6 +21,7 @@
 
 use "../../engine/tree"
 use "../../engine/dirty"
+use "../../engine/sdf_font"
 use "../../themes/dark"
 use "../../widgets/input/button"
 
@@ -54,7 +55,7 @@ end
 // Returns: menu index (used for ui_menu_item)
 fn ui_menu(bar_id, label)
   // Create trigger button in the menubar row
-  let label_w = (len(label) + 2.0) * 10.0
+  let label_w = ui_text_width(label, 16.0) + 20.0
   let trigger = ui_button(bar_id, label_w, 24.0, label)
 
   // Create hidden column for menu items (root-level, positioned later)

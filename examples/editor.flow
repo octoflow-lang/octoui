@@ -125,7 +125,10 @@ while running == 1.0
     let lcount = _ui_ta_line_count[ta_idx2]
     let cline1 = cline + 1.0
     let ccol1 = ccol + 1.0
-    let _su = ui_statusbar_set_text(st_text, "LINE " + cline1 + " COL " + ccol1 + " / " + lcount + " LINES")
+    let s_cline = to_str(cline1)
+    let s_ccol = to_str(ccol1)
+    let s_lcount = to_str(lcount)
+    let _su = ui_statusbar_set_text(st_text, "LINE " + s_cline + " COL " + s_ccol + " / " + s_lcount + " LINES")
     let _l2 = ui_layout_update()
   end
 
@@ -139,9 +142,9 @@ while running == 1.0
   // Render if dirty
   if ui_is_dirty() == 1.0
     let _r = ui_pipeline_render()
-    let _p = ui_pipeline_present()
     let _cd = ui_clear_dirty()
   else
+    let _p = ui_pipeline_present()
     let _sl = sleep(16.0)
   end
 end

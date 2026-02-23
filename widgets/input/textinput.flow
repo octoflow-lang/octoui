@@ -222,8 +222,9 @@ fn ui_textinput_process_key(key)
     end
     if cur_pos > 0.0
       // Delete character at cur_pos - 1
-      let before = substring(current, 0.0, cur_pos - 1.0)
-      let after = substring(current, cur_pos, cur_len)
+      let before = substr(current, 0.0, cur_pos - 1.0)
+      let _sl = cur_len - cur_pos
+      let after = substr(current, cur_pos, _sl)
       let mut new_text = before + after
       if len(new_text) == 0.0
         new_text = " "
@@ -245,8 +246,9 @@ fn ui_textinput_process_key(key)
       return 0.0
     end
     if cur_pos < cur_len
-      let before = substring(current, 0.0, cur_pos)
-      let after = substring(current, cur_pos + 1.0, cur_len)
+      let before = substr(current, 0.0, cur_pos)
+      let _sl2 = cur_len - cur_pos - 1.0
+      let after = substr(current, cur_pos + 1.0, _sl2)
       let mut new_text = before + after
       if len(new_text) == 0.0
         new_text = " "
@@ -268,8 +270,9 @@ fn ui_textinput_process_key(key)
       _ui_texts[focus] = " "
       _ui_ti_cursor[focus] = 1.0
     else
-      let before = substring(current, 0.0, cur_pos)
-      let after = substring(current, cur_pos, cur_len)
+      let before = substr(current, 0.0, cur_pos)
+      let _sl3 = cur_len - cur_pos
+      let after = substr(current, cur_pos, _sl3)
       let new_text = before + " " + after
       _ui_ti_values[focus] = new_text
       _ui_texts[focus] = new_text
@@ -288,8 +291,9 @@ fn ui_textinput_process_key(key)
       _ui_texts[focus] = key
       _ui_ti_cursor[focus] = 1.0
     else
-      let before = substring(current, 0.0, cur_pos)
-      let after = substring(current, cur_pos, cur_len)
+      let before = substr(current, 0.0, cur_pos)
+      let _sl4 = cur_len - cur_pos
+      let after = substr(current, cur_pos, _sl4)
       let new_text = before + key + after
       _ui_ti_values[focus] = new_text
       _ui_texts[focus] = new_text

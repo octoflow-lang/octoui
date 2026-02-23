@@ -280,7 +280,7 @@ fn ui_treeview_refresh(tree)
       let indent = depth * UI_TV_INDENT
       _ui_x[txt] = cx + indent + 4.0
       _ui_y[txt] = cy + ri * row_h + 2.0
-      _ui_w[txt] = len(display_text) * 10.0
+      _ui_w[txt] = ui_text_width(display_text, 16.0)
       _ui_dirty[txt] = 1.0
       _ui_texts[txt] = display_text
     else

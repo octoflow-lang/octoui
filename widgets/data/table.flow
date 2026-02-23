@@ -283,7 +283,7 @@ fn ui_table_refresh(table_id)
           _ui_texts[cell] = _ui_tbl_data[data_idx]
           // Update text width from content length
           let content = _ui_tbl_data[data_idx]
-          _ui_w[cell] = len(content) * 10.0
+          _ui_w[cell] = ui_text_width(content, 16.0)
         end
 
         tx = tx + _ui_tbl_col_w[col_off + cj]

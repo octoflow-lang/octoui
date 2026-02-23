@@ -22,12 +22,12 @@ let mut fail = 0.0
 // ── Test 1: Pipeline init ──
 let _w = ui_window_open(320.0, 240.0, "Pipeline Test")
 
-let fb_len = len(_ui_fb_r)
-if fb_len == 76800.0
+let total_px = _ui_vm[4]
+if total_px == 76800.0
   print("PASS: framebuffer allocated 320*240=76800")
   pass = pass + 1.0
 else
-  print("FAIL: framebuffer size {fb_len}, expected 76800")
+  print("FAIL: total_pixels {total_px}, expected 76800")
   fail = fail + 1.0
 end
 
@@ -66,14 +66,14 @@ end
 // ── Test 4: Render frame ──
 let _r = ui_pipeline_render()
 
-// Check framebuffer has non-zero values (BG color should be filled)
-let bg_pixel = _ui_fb_r[0]
-if bg_pixel > 0.0
-  print("PASS: framebuffer has content after render")
+// Verify render completed without error (GPU executed all dispatches)
+let vm_init = _ui_vm[3]
+if vm_init == 1.0
+  print("PASS: render completed (VM still initialized)")
   pass = pass + 1.0
 else
-  print("INFO: framebuffer pixel[0]={bg_pixel} (may be correct if BG is very dark)")
-  pass = pass + 1.0
+  print("FAIL: VM not initialized after render")
+  fail = fail + 1.0
 end
 
 // ── Test 5: Present ──

@@ -208,9 +208,9 @@ while running == 1.0
     let _ly = ui_layout_update()
     let _scu2 = ui_scroll_update_all()
     let _r = ui_pipeline_render()
-    let _p = ui_pipeline_present()
     let _cd = ui_clear_dirty()
   else
+    let _p = ui_pipeline_present()
     let _sl = sleep(16.0)
   end
 end

@@ -10,6 +10,7 @@
 
 use "../../engine/tree"
 use "../../engine/dirty"
+use "../../engine/sdf_font"
 use "../../themes/dark"
 
 // Create a status bar (horizontal row, surface background)
@@ -29,7 +30,7 @@ end
 // text: initial text
 // Returns: text widget ID
 fn ui_statusbar_text(bar_id, text)
-  let tw = len(text) * 10.0
+  let tw = ui_text_width(text, 14.0)
   let txt = ui_tree_add(UI_TEXT, bar_id, tw, 14.0, text)
   let _tc = ui_tree_set_color_themed(txt, UI_COLOR_TEXT_DIM)
   return txt
@@ -40,7 +41,7 @@ end
 // new_text: replacement text
 fn ui_statusbar_set_text(text_id, new_text)
   _ui_texts[text_id] = new_text
-  _ui_w[text_id] = len(new_text) * 10.0
+  _ui_w[text_id] = ui_text_width(new_text, 14.0)
   _ui_dirty[text_id] = 1.0
   let _d = ui_mark_dirty()
   return 0.0

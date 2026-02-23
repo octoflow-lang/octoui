@@ -14,6 +14,7 @@
 use "../../engine/tree"
 use "../../engine/layout"
 use "../../engine/dirty"
+use "../../engine/sdf_font"
 use "../../themes/dark"
 use "../input/button"
 
@@ -30,7 +31,7 @@ let mut _ui_sec_title = []
 fn ui_section(parent, title)
   // Header button with expand icon
   let header_text = "V " + title
-  let header_w = (len(header_text) + 2.0) * 10.0
+  let header_w = ui_text_width(header_text, 16.0) + 20.0
   let header = ui_button(parent, header_w, 24.0, header_text)
 
   // Content body column

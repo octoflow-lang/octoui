@@ -83,7 +83,7 @@ fn ui_notify_process()
     _ui_notify_colors = new_colors
 
     // Position: top-right, with padding
-    let text_w = len(_ui_notify_active_text) * 10.0 + 20.0
+    let text_w = ui_text_width(_ui_notify_active_text, 16.0) + 20.0
     let nx = _ui_notify_screen_w - text_w - 12.0
     let ny = 12.0
 
