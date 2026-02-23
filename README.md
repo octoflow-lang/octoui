@@ -72,6 +72,7 @@ octoflow run octoui/examples/counter.flow --allow-read --allow-write --allow-ffi
 | `contextmenu.flow`| Right-click context menus                                |
 | `editor.flow`     | Multi-line text editor with cursor navigation            |
 | `logviewer.flow`  | Read-only log viewer with auto-scroll                    |
+| `studio.flow`     | OctoUI Studio — WYSIWYG visual builder (palette+canvas)  |
 
 ## Architecture
 
@@ -113,7 +114,7 @@ octoui/
   themes/        dark.flow, light.flow, terminal.flow
   platform/      Win32 window + input events
   state/         Reactive signals + bindings
-  examples/      20 example apps
+  examples/      21 example apps
   tests/         82 tests (12 tree + 6 kernel + 5 pipeline + 11 dialog + 12 tabs + 13 dropdown + 12 scrollview + 11 theming)
   docs/          quickstart, architecture, widget reference
 ```

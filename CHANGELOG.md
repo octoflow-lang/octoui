@@ -94,4 +94,10 @@
 - Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled, login, menubar, contextmenu, editor, logviewer, long_list
 - Documentation: quickstart, architecture, widgets (complete reference)
 - Terminal theme (green-on-black phosphor palette — ui_theme_load_terminal)
+- OctoUI Studio app (WYSIWYG visual builder — three-panel layout, live widget placement)
+  - Widget palette (ListView, 16 types)
+  - Canvas (scroll container — placed buttons are real OctoUI tree nodes)
+  - Property panel (label TextInput, width/height Spinbox)
+  - Add / Remove / Clear / Gen Code toolbar actions
+  - Code generation prints valid .flow widget calls to terminal
 - Tests: 82/82 passing (12 tree + 6 kernel + 5 pipeline + 11 dialog + 12 tabs + 13 dropdown + 12 scrollview + 11 theming)
