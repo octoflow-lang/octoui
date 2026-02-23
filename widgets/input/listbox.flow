@@ -22,9 +22,7 @@ use "../../engine/tree"
 use "../../engine/dirty"
 use "../../themes/dark"
 
-// Listbox type constant
-let UI_LISTBOX = 12.0
-
+// UI_LISTBOX defined in tree.flow
 // Row height for listbox items
 let UI_LISTBOX_ROW_H = 22.0
 

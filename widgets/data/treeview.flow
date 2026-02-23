@@ -21,9 +21,7 @@ use "../../engine/tree"
 use "../../engine/dirty"
 use "../../themes/dark"
 
-// Widget type constant
-let UI_TREEVIEW = 16.0
-
+// UI_TREEVIEW defined in tree.flow
 // Indent per depth level in pixels
 let UI_TV_INDENT = 16.0
 

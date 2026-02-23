@@ -68,12 +68,24 @@
 - Focus border hidden for disabled widgets
 - Collapsible section widget (accordion — clickable header with expand/collapse content)
 - Programmatic section expand/collapse (ui_section_expand, ui_section_collapse)
-- 19 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview
+- 20 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview, textarea
 - Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
-- Composite widgets: dropdown, tabs, spinbox, modal, progress, label, separator, tooltip, notification, section (all built from primitives)
+- Composite widgets: dropdown, tabs, spinbox, modal, progress, label, separator, tooltip, notification, section, menubar, statusbar, contextmenu (all built from primitives)
 - Text input placeholder text (dimmed hint shown when empty and unfocused)
 - Text input password masking (renders * instead of characters)
 - Text input readonly mode (no editing, no cursor, still accepts Enter for submit)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled, login
+- Menubar widget (trigger buttons + dropdown columns, hover-to-switch, Escape to close)
+- Status bar widget (horizontal text segments at bottom, surface-colored)
+- Right-click context menu (widget-registered popup menus at cursor position)
+- Right-click mouse detection (ui_right_down, ui_right_clicked)
+- Left/right mouse button discrimination in input.flow
+- Multi-line text area widget (cursor, scroll, line splitting, readonly mode)
+- Text area keyboard: arrow nav, Home/End, Page Up/Down, Enter/Backspace/Delete across lines, Tab indent
+- Text area click-to-position cursor
+- Text area readonly mode (navigation only, for log viewers and code displays)
+- Text area auto-scroll-to-bottom (for log append pattern)
+- Menubar/context menu mutual exclusion (only one open at a time)
+- Widget type constants centralized in tree.flow (all 17 types defined in one place)
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled, login, menubar, contextmenu, editor, logviewer
 - Documentation: quickstart, architecture, widgets (complete reference)
-- Tests: 18/18 passing (12 tree + 6 kernel)
+- Tests: 23/23 passing (12 tree + 6 kernel + 5 pipeline)

@@ -20,6 +20,7 @@
 | UI_SCROLL | 14.0 | Scroll container |
 | UI_TABLE | 15.0 | Data table |
 | UI_TREEVIEW | 16.0 | Tree view |
+| UI_TEXTAREA | 17.0 | Multi-line text area |
 
 ## Core Widgets
 
@@ -224,6 +225,69 @@ let text = ui_textinput_value(input)
 
 **Readonly mode:** Set with `ui_textinput_set_readonly(id, 1.0)`. The input displays its text but cannot be edited. No cursor is shown. Enter still fires `ui_textinput_submitted`. Useful for displaying pre-filled, non-editable values.
 
+### Text Area — `widgets/input/textarea.flow`
+
+A multi-line text editing area with cursor, scroll, and readonly mode. Essential for editors, log viewers, and code displays.
+
+```
+use "octoui/widgets/input/textarea"
+
+let ta = ui_textarea(parent, 400.0, 200.0)
+
+// Set content (lines separated by chr(10)):
+let nl = chr(10.0)
+let _st = ui_textarea_set_text(ta, "LINE ONE" + nl + "LINE TWO" + nl + "LINE THREE")
+
+// Or append lines:
+let _al = ui_textarea_append_line(ta, "NEW LINE")
+
+// In event loop:
+let key = ui_key_down()
+let _tp = ui_textarea_process_key(key)
+let _tc = ui_textarea_process_click(ta, mx, my, clicked)
+
+// Get content:
+let text = ui_textarea_get_text(ta)
+let line = ui_textarea_get_line(ta, 0.0)
+let count = ui_textarea_line_count(ta)
+```
+
+**Parameters:**
+- `parent` — Parent widget ID
+- `w` — Width in pixels
+- `h` — Height in pixels (determines visible lines: h / 16)
+
+**Functions:**
+- `ui_textarea(parent, w, h)` — Create textarea, returns widget ID
+- `ui_textarea_set_text(id, text)` — Set content (splits on newline)
+- `ui_textarea_append_line(id, text)` — Append a line
+- `ui_textarea_get_text(id)` — Get all content (joined with newline)
+- `ui_textarea_get_line(id, line_idx)` — Get single line
+- `ui_textarea_line_count(id)` — Get number of lines
+- `ui_textarea_set_readonly(id, flag)` — 1.0 = readonly (navigation only)
+- `ui_textarea_process_key(key)` — Process keyboard for focused textarea
+- `ui_textarea_process_click(id, mx, my, clicked)` — Handle click-to-position cursor
+- `ui_textarea_scroll_to(id, line)` — Scroll to specific line
+- `ui_textarea_scroll_to_bottom(id)` — Auto-scroll to last line
+- `ui_textarea_set_cursor(id, line, col)` — Set cursor position
+
+**Keyboard:**
+
+| Key | Action |
+|-----|--------|
+| Arrow keys | Move cursor (wraps at line boundaries) |
+| Home/End | Start/end of line |
+| Page Up/Down | Scroll by viewport height |
+| Enter | Split line (insert new line) |
+| Backspace | Delete before cursor (merges lines at col 0) |
+| Delete | Delete at cursor (merges at end of line) |
+| Tab | Insert two spaces |
+| Characters | Insert at cursor position |
+
+**Readonly mode:** Navigation works (arrows, Page Up/Down) but editing is disabled. Useful for log viewers and code displays.
+
+**Rendering:** Only visible lines are rendered (viewport = floor(h / 16)). Line height is 16px. Cursor renders as a 2px vertical bar at the current position.
+
 ### Slider — `widgets/input/slider.flow`
 
 A horizontal slider for numeric input. Click and drag to change value.
@@ -320,6 +384,42 @@ let sel = ui_dropdown_selected(dd)  // 0-based index
 - `ui_dropdown_process(mx, my, clicked)` — Process clicks (call each frame)
 
 **Behavior:** Click trigger to open/close option list. Click option to select. Click outside or press Escape to close. Only one dropdown open at a time.
+
+### Context Menu — `widgets/input/contextmenu.flow`
+
+A right-click popup menu. Register context menus on widgets; right-click opens them at cursor position.
+
+```
+use "octoui/widgets/input/contextmenu"
+
+let ctx = ui_contextmenu()
+let ci_del = ui_contextmenu_item(ctx, "DELETE")
+let ci_ren = ui_contextmenu_item(ctx, "RENAME")
+let _reg = ui_contextmenu_register(my_widget, ctx)
+
+// In event loop:
+let rclicked = ui_right_clicked()
+let lclicked = ui_mouse_clicked()
+let _cp = ui_contextmenu_process(mx, my, rclicked, lclicked)
+
+if ui_ctx_item_clicked(ci_del) == 1.0
+  // Handle DELETE
+end
+```
+
+**Functions:**
+- `ui_contextmenu()` — Create context menu, returns menu index
+- `ui_contextmenu_item(ctx_idx, label)` — Add item, returns item widget ID
+- `ui_contextmenu_register(widget_id, ctx_idx)` — Attach menu to a widget
+- `ui_contextmenu_process(mx, my, right_clicked, left_clicked)` — Process each frame
+- `ui_ctx_item_clicked(item_id)` — Check if item was clicked this frame
+- `ui_contextmenu_close_all()` — Close any open context menu
+
+**Right-click detection:**
+- `ui_right_down()` — Returns 1.0 if right mouse button is held
+- `ui_right_clicked()` — Returns 1.0 if right mouse just clicked this frame
+
+**Behavior:** Right-click a registered widget to open its context menu at cursor position. Left-click an item to select and close. Left-click outside or Escape to close. Mutual exclusion with menubar menus.
 
 ### Toggle Switch — `widgets/input/toggle.flow`
 
@@ -597,6 +697,59 @@ let _sp = ui_section_process()
 - `ui_section_expand(body_id)` — Programmatically expand
 - `ui_section_collapse(body_id)` — Programmatically collapse
 
+### Menubar — `widgets/layout/menubar.flow`
+
+A horizontal menu bar with trigger buttons that open dropdown columns. Supports hover-to-switch: when one menu is open, hovering another trigger instantly opens it.
+
+```
+use "octoui/widgets/layout/menubar"
+
+let bar = ui_menubar(root)
+let file_m = ui_menu(bar, "FILE")
+let mi_new = ui_menu_item(file_m, "NEW")
+let mi_open = ui_menu_item(file_m, "OPEN")
+let _sep = ui_menu_separator(file_m)
+let mi_exit = ui_menu_item(file_m, "EXIT")
+
+// In event loop (after ui_process_input):
+let _mp = ui_menubar_process(mx, my, clicked)
+
+// Check item clicks:
+if ui_menu_item_clicked(mi_new) == 1.0
+  // Handle NEW
+end
+```
+
+**Functions:**
+- `ui_menubar(parent)` — Create menubar row
+- `ui_menu(bar_id, label)` — Add a menu trigger, returns menu index
+- `ui_menu_item(menu_idx, label)` — Add an item, returns item widget ID
+- `ui_menu_separator(menu_idx)` — Add a visual separator
+- `ui_menubar_process(mx, my, clicked)` — Process interactions each frame
+- `ui_menu_item_clicked(item_id)` — Check if item was clicked this frame
+- `ui_menubar_close_all()` — Close any open menu
+
+**Behavior:** Click trigger to open/close. Hover-to-switch when a menu is open. Click item to select and close. Click outside or Escape to close. Only one menu open at a time. Mutual exclusion with context menus.
+
+### Status Bar — `widgets/layout/statusbar.flow`
+
+A horizontal bar for displaying status text segments.
+
+```
+use "octoui/widgets/layout/statusbar"
+
+let sbar = ui_statusbar(root, 480.0)
+let st = ui_statusbar_text(sbar, "READY")
+
+// Update text:
+let _u = ui_statusbar_set_text(st, "FILE SAVED")
+```
+
+**Functions:**
+- `ui_statusbar(parent, w)` — Create status bar row (22px tall, surface color)
+- `ui_statusbar_text(bar_id, text)` — Add text segment, returns text widget ID
+- `ui_statusbar_set_text(text_id, new_text)` — Update text content
+
 ## Overlay Widgets
 
 ### Modal — `widgets/core/modal.flow`
@@ -837,7 +990,7 @@ let focus = ui_get_focus()     // Get focused widget ID (-1 if none)
 let _sf = ui_set_focus(id)     // Set focus programmatically
 ```
 
-**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox, Scroll, Table, TreeView.
+**Focusable types:** Button, Checkbox, Text Input, Slider, Radio, Toggle, Listbox, Spinbox, Scroll, Table, TreeView, TextArea.
 
 **Visual feedback:** Focused widgets show a 2px primary-color border. Text inputs also show a blinking cursor when focused.
 

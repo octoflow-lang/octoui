@@ -23,9 +23,7 @@ use "../../engine/tree"
 use "../../engine/dirty"
 use "../../themes/dark"
 
-// Widget type constant
-let UI_TABLE = 15.0
-
+// UI_TABLE defined in tree.flow
 // --- Registry arrays (one entry per table) ---
 let mut _ui_tbl_ids = []
 let mut _ui_tbl_ncols = []

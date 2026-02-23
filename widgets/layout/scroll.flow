@@ -21,9 +21,7 @@ use "../../engine/tree"
 use "../../engine/dirty"
 use "../../themes/dark"
 
-// Widget type constant
-let UI_SCROLL = 14.0
-
+// UI_SCROLL defined in tree.flow
 // Scrollbar dimensions
 let UI_SCROLL_BAR_W = 8.0
 let UI_SCROLL_MIN_THUMB = 16.0

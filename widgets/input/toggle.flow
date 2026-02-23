@@ -17,8 +17,7 @@ use "../../engine/tree"
 use "../../engine/dirty"
 use "../../themes/dark"
 
-// Toggle switch constants
-let UI_TOGGLE = 10.0
+// Toggle switch constants (UI_TOGGLE defined in tree.flow)
 let UI_TOGGLE_W = 36.0
 let UI_TOGGLE_H = 16.0
 let UI_TOGGLE_KNOB_W = 14.0

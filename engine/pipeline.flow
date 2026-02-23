@@ -21,6 +21,7 @@ use "../widgets/core/modal"
 use "../widgets/layout/scroll"
 use "../widgets/data/table"
 use "../widgets/data/treeview"
+use "../widgets/input/textarea"
 
 // VM state: [0]=vm_id [1]=screen_w [2]=screen_h [3]=initialized [4]=total_pixels
 let mut _ui_vm = [0.0, 0.0, 0.0, 0.0, 0.0]
@@ -140,6 +141,9 @@ fn ui_pipeline_render()
         if ftype == UI_TREEVIEW
           draw_border = 1.0
         end
+        if ftype == UI_TEXTAREA
+          draw_border = 1.0
+        end
         if draw_border == 1.0
           if _ui_enabled[fi] == 0.0
             draw_border = 0.0
@@ -207,6 +211,9 @@ fn ui_pipeline_render()
       if wtype == UI_TREEVIEW
         let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
       end
+      if wtype == UI_TEXTAREA
+        let _dr = ui_pipeline_dispatch_rect(vm, i, w, total)
+      end
     end
     i = i + 1.0
   end
@@ -228,6 +235,9 @@ fn ui_pipeline_render()
       end
       if wtype == UI_SPINBOX
         let _dt = ui_pipeline_dispatch_button_text(vm, j, w, total)
+      end
+      if wtype == UI_TEXTAREA
+        let _dt = ui_pipeline_dispatch_textarea_text(vm, j, w, total)
       end
     end
     j = j + 1.0
@@ -450,6 +460,9 @@ fn ui_pipeline_render()
           if mwtype == UI_TREEVIEW
             mdraw = 1.0
           end
+          if mwtype == UI_TEXTAREA
+            mdraw = 1.0
+          end
           if mdraw == 1.0
             let _mdr = ui_pipeline_dispatch_rect(vm, mi, w, total)
           end
@@ -469,6 +482,9 @@ fn ui_pipeline_render()
           end
           if mwtype2 == UI_BUTTON
             let _mdt2 = ui_pipeline_dispatch_button_text(vm, mj, w, total)
+          end
+          if mwtype2 == UI_TEXTAREA
+            let _mdt3 = ui_pipeline_dispatch_textarea_text(vm, mj, w, total)
           end
         end
       end
@@ -818,6 +834,124 @@ fn ui_pipeline_dispatch_textinput_text(vm, idx, screen_w, total)
     let pixels = 2.0 * cursor_h
     let wg2 = floor((pixels + 255.0) / 256.0)
     let _dc = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, wg2)
+  end
+
+  return 0.0
+end
+
+// Dispatch text for a TEXTAREA widget (multi-line, scrolled, with cursor)
+fn ui_pipeline_dispatch_textarea_text(vm, idx, screen_w, total)
+  // Find textarea index from widget ID
+  let mut ta_idx = -1.0
+  let mut fi = 0.0
+  while fi < len(_ui_ta_widgets)
+    if _ui_ta_widgets[fi] == idx
+      ta_idx = fi
+    end
+    fi = fi + 1.0
+  end
+  if ta_idx < 0.0
+    return 0.0
+  end
+
+  let bx = _ui_x[idx]
+  let by = _ui_y[idx]
+  let bh = _ui_h[idx]
+  let scale = 2.0
+  let char_w = 5.0 * scale
+  let line_h = 16.0
+  let text_pad = 4.0
+
+  let cr = ui_theme_r(UI_COLOR_TEXT)
+  let cg = ui_theme_g(UI_COLOR_TEXT)
+  let cb = ui_theme_b(UI_COLOR_TEXT)
+
+  let scroll = _ui_ta_scroll[ta_idx]
+  let line_count = _ui_ta_line_count[ta_idx]
+  let start = _ui_ta_line_start[ta_idx]
+  let vis_lines = floor(bh / line_h)
+
+  // Render visible lines
+  let mut li = 0.0
+  while li < vis_lines
+    let line_idx = scroll + li
+    if line_idx < line_count
+      let flat_idx = start + line_idx
+      let line_text = _ui_ta_lines[flat_idx]
+      let lx = bx + text_pad
+      let ly = by + li * line_h + 2.0
+
+      let tlen = len(line_text)
+      let mut ci = 0.0
+      while ci < tlen
+        let ch = char_at(line_text, ci)
+        let ch_code = ord(ch)
+
+        if ch_code > 32.0
+          let mut glyph_idx = ch_code - 32.0
+          if ch_code >= 97.0
+            if ch_code <= 122.0
+              glyph_idx = ch_code - 97.0 + 33.0
+            end
+          end
+
+          if glyph_idx >= 0.0
+            if glyph_idx < 64.0
+              let dx = lx + ci * char_w
+
+              _ui_pc_text[0] = glyph_idx * 6.0
+              _ui_pc_text[1] = dx
+              _ui_pc_text[2] = ly
+              _ui_pc_text[3] = scale
+              _ui_pc_text[4] = cr
+              _ui_pc_text[5] = cg
+              _ui_pc_text[6] = cb
+              _ui_pc_text[7] = screen_w
+              _ui_pc_text[8] = total
+
+              let threads = 24.0 * scale * scale
+              let wg = floor((threads + 255.0) / 256.0)
+              let _dg = vm_dispatch(vm, _ui_spv_text, _ui_pc_text, wg)
+            end
+          end
+        end
+        ci = ci + 1.0
+      end
+    end
+    li = li + 1.0
+  end
+
+  // Draw cursor if focused and not readonly
+  if idx == _ui_focus_id
+    let is_ro = _ui_ta_readonly[ta_idx]
+    if is_ro == 0.0
+      let cur_line = _ui_ta_cursor_line[ta_idx]
+      let cur_col = _ui_ta_cursor_col[ta_idx]
+
+      // Only draw cursor if visible in viewport
+      if cur_line >= scroll
+        let vis_end = scroll + vis_lines
+        if cur_line < vis_end
+          let rel_line = cur_line - scroll
+          let cursor_x = bx + text_pad + cur_col * char_w
+          let cursor_y = by + rel_line * line_h + 1.0
+          let cursor_h = line_h - 2.0
+
+          _ui_pc_rect[0] = cursor_x
+          _ui_pc_rect[1] = cursor_y
+          _ui_pc_rect[2] = 2.0
+          _ui_pc_rect[3] = cursor_h
+          _ui_pc_rect[4] = cr
+          _ui_pc_rect[5] = cg
+          _ui_pc_rect[6] = cb
+          _ui_pc_rect[7] = screen_w
+          _ui_pc_rect[8] = total
+          let cpx = 2.0 * cursor_h
+          let cwg = floor((cpx + 255.0) / 256.0)
+          let _dcur = vm_dispatch(vm, _ui_spv_rect, _ui_pc_rect, cwg)
+        end
+      end
+    end
   end
 
   return 0.0

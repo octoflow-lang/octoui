@@ -20,9 +20,7 @@ use "../../engine/dirty"
 use "../../themes/dark"
 use "../../widgets/input/button"
 
-// Spinbox type constant
-let UI_SPINBOX = 13.0
-
+// UI_SPINBOX defined in tree.flow
 // Spinbox state (indexed by row widget ID)
 let mut _ui_spin_container = []  // container widget ID
 let mut _ui_spin_minus = []      // minus button widget ID
