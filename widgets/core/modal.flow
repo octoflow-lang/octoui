@@ -33,7 +33,8 @@ let mut _ui_modal_close_btn = []   // close button widget ID
 let mut _ui_modal_panel = []       // content panel widget ID
 
 // Global: which modal is open (-1 = none)
-let mut _ui_modal_active = -1.0
+// Stored as array so function mutations propagate back (scalar snapshot semantics)
+let mut _ui_modal_active = [-1.0]
 
 // Screen dimensions (set during init)
 let mut _ui_modal_screen = [800.0, 600.0]
@@ -106,8 +107,8 @@ fn ui_modal_open(modal_id)
   end
 
   // Close any already open modal
-  if _ui_modal_active >= 0.0
-    let _c = ui_modal_close(_ui_modal_active)
+  if _ui_modal_active[0] >= 0.0
+    let _c = ui_modal_close(_ui_modal_active[0])
   end
 
   let container = _ui_modal_ids[modal_id]
@@ -122,7 +123,7 @@ fn ui_modal_open(modal_id)
 
   _ui_visible[container] = 1.0
   _ui_modal_open[modal_id] = 1.0
-  _ui_modal_active = modal_id
+  _ui_modal_active[0] = modal_id
 
   let _d = ui_mark_dirty()
   return 0.0
@@ -138,8 +139,8 @@ fn ui_modal_close(modal_id)
   _ui_visible[container] = 0.0
   _ui_modal_open[modal_id] = 0.0
 
-  if _ui_modal_active == modal_id
-    _ui_modal_active = -1.0
+  if _ui_modal_active[0] == modal_id
+    _ui_modal_active[0] = -1.0
   end
 
   let _d = ui_mark_dirty()
@@ -156,17 +157,17 @@ end
 
 // Check if any modal is active (used by input system to block background input)
 fn ui_modal_active()
-  return _ui_modal_active
+  return _ui_modal_active[0]
 end
 
 // Process modal interactions each frame
 // Call after ui_process_input()
 fn ui_modal_process()
-  if _ui_modal_active < 0.0
+  if _ui_modal_active[0] < 0.0
     return 0.0
   end
 
-  let modal_id = _ui_modal_active
+  let modal_id = _ui_modal_active[0]
   let close_btn = _ui_modal_close_btn[modal_id]
 
   // Close button click
@@ -180,8 +181,8 @@ end
 
 // Get modal container ID (for pipeline overlay rendering)
 fn ui_modal_container()
-  if _ui_modal_active < 0.0
+  if _ui_modal_active[0] < 0.0
     return -1.0
   end
-  return _ui_modal_ids[_ui_modal_active]
+  return _ui_modal_ids[_ui_modal_active[0]]
 end

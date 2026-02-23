@@ -68,12 +68,6 @@
 - Focus border hidden for disabled widgets
 - Collapsible section widget (accordion — clickable header with expand/collapse content)
 - Programmatic section expand/collapse (ui_section_expand, ui_section_collapse)
-- 20 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview, textarea
-- Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
-- Composite widgets: dropdown, tabs, spinbox, modal, progress, label, separator, tooltip, notification, section, menubar, statusbar, contextmenu (all built from primitives)
-- Text input placeholder text (dimmed hint shown when empty and unfocused)
-- Text input password masking (renders * instead of characters)
-- Text input readonly mode (no editing, no cursor, still accepts Enter for submit)
 - Menubar widget (trigger buttons + dropdown columns, hover-to-switch, Escape to close)
 - Status bar widget (horizontal text segments at bottom, surface-colored)
 - Right-click context menu (widget-registered popup menus at cursor position)
@@ -85,7 +79,18 @@
 - Text area readonly mode (navigation only, for log viewers and code displays)
 - Text area auto-scroll-to-bottom (for log append pattern)
 - Menubar/context menu mutual exclusion (only one open at a time)
-- Widget type constants centralized in tree.flow (all 17 types defined in one place)
-- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled, login, menubar, contextmenu, editor, logviewer
+- Widget type constants centralized in tree.flow (all 17 types — fixes pipeline test coverage)
+- Text input placeholder text (dimmed hint shown when empty and unfocused)
+- Text input password masking (renders * instead of characters)
+- Text input readonly mode (no editing, no cursor, still accepts Enter for submit)
+- 20 widget types: box, text, button, row, column, checkbox, textinput, slider, radio, label, dropdown, toggle, tabs, listbox, spinbox, tooltip, scroll, table, treeview, textarea
+- ListView widget (virtual rendering — allocates only disp_rows display widgets regardless of item count)
+- ListView virtual scroll (remap data→display on scroll offset change)
+- ListView keyboard navigation (Up/Down/PageUp/PageDown/Home/End/click-to-select)
+- ListView auto-scroll (set_selected ensures item is visible, scrolls viewport if needed)
+- ListView alternating row colors (BG/SURFACE striping, PRIMARY for selected)
+- Full keyboard accessibility (Tab + Space + Enter + arrows + Home/End + Up/Down + PageUp/PageDown)
+- Composite widgets: dropdown, tabs, spinbox, modal, progress, label, separator, tooltip, notification, section, menubar, statusbar, contextmenu (all built from primitives)
+- Examples: hello, counter, dashboard, timer, form, settings, panel, tabs, kitchen, themes, dialog, table, explorer, disabled, login, menubar, contextmenu, editor, logviewer, long_list
 - Documentation: quickstart, architecture, widgets (complete reference)
-- Tests: 23/23 passing (12 tree + 6 kernel + 5 pipeline)
+- Tests: 71/71 passing (12 tree + 6 kernel + 5 pipeline + 11 dialog + 12 tabs + 13 dropdown + 12 scrollview)
